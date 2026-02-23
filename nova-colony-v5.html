@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NOVA COLONY V</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#010a12;--panel:#040f1e;--panel2:#061524;--panel3:#071828;
+  --border:#0a3a5c;--dim:#2a5a7a;--dim2:#1a3a52;
+  --text:#7ec0dd;--text2:#5a9ab8;
+  --acc:#00d4ff;--acc2:#ff6b35;
+  --green:#39ff14;--yellow:#ffd700;--red:#ff2244;--purple:#b44fff;--teal:#00ffcc;
+  --fn:'Share Tech Mono',monospace;--fh:'Orbitron',sans-serif;
+  /* Chromatic science colors */
+  --sci-red:#ff4444;--sci-green:#44ff88;--sci-blue:#4488ff;
+  --sci-yellow:#ffee44;--sci-purple:#cc44ff;--sci-white:#e0e8ff;
+  --sci-chroma:linear-gradient(135deg,#ff4444,#ffee44,#44ff88,#4488ff,#cc44ff);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--fn);}
+#app{display:flex;flex-direction:column;height:100vh;}
+
+/* TOPBAR */
+#topbar{flex-shrink:0;display:flex;align-items:center;background:var(--panel);border-bottom:2px solid var(--border);padding:0 8px;height:44px;z-index:20;gap:4px;}
+.logo{font-family:var(--fh);font-weight:900;font-size:.88rem;color:var(--acc);text-shadow:0 0 14px var(--acc);letter-spacing:4px;padding-right:8px;border-right:1px solid var(--border);white-space:nowrap;}
+.tbtn{font-family:var(--fn);font-size:.56rem;letter-spacing:1px;padding:4px 8px;background:transparent;border:1px solid var(--border);color:var(--dim);cursor:pointer;border-radius:2px;transition:all .15s;white-space:nowrap;}
+.tbtn:hover{border-color:var(--acc);color:var(--acc);}
+.tbtn.active{border-color:var(--acc);color:var(--acc);background:rgba(0,212,255,.08);}
+.tbtn.locked{opacity:.3;cursor:not-allowed;pointer-events:none;}
+.chip{display:flex;align-items:center;gap:3px;font-size:.58rem;padding:2px 6px;background:var(--panel2);border:1px solid var(--border);border-radius:2px;white-space:nowrap;}
+.chip .cv{color:var(--green);font-family:var(--fh);font-size:.62rem;}
+.chip .cv.warn{color:var(--red);}
+.cycle-wrap{display:flex;align-items:center;gap:4px;margin-left:auto;}
+.cyc-lbl{font-size:.54rem;color:var(--dim);letter-spacing:2px;}
+.cyc-num{font-family:var(--fh);font-size:.78rem;color:var(--yellow);}
+.end-btn{font-family:var(--fh);font-size:.56rem;letter-spacing:2px;padding:5px 10px;background:transparent;border:2px solid var(--acc2);color:var(--acc2);cursor:pointer;border-radius:2px;transition:all .2s;}
+.end-btn:hover{background:var(--acc2);color:#000;box-shadow:0 0 14px rgba(255,107,53,.5);}
+
+/* LAYOUT */
+#main{flex:1;display:flex;overflow:hidden;}
+#sidebar{width:260px;flex-shrink:0;background:var(--panel);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
+.sb-tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;}
+.sb-tab{flex:1;font-family:var(--fn);font-size:.54rem;letter-spacing:1px;padding:6px 2px;background:transparent;border:none;color:var(--dim);cursor:pointer;transition:all .12s;border-bottom:2px solid transparent;}
+.sb-tab.active{color:var(--acc);border-bottom-color:var(--acc);background:rgba(0,212,255,.04);}
+.sb-panel{display:none;flex:1;overflow-y:auto;flex-direction:column;}
+.sb-panel.active{display:flex;}
+.sb-panel::-webkit-scrollbar{width:3px;}
+.sb-panel::-webkit-scrollbar-thumb{background:var(--border);}
+
+/* BUILD */
+.glbl{font-size:.52rem;color:var(--dim);letter-spacing:2px;padding:6px 9px 2px;border-top:1px solid var(--dim2);}
+.glbl:first-child{border-top:none;}
+.bbtn{width:100%;background:transparent;border:none;border-bottom:1px solid var(--dim2);color:var(--text);font-family:var(--fn);font-size:.65rem;padding:6px 8px;cursor:pointer;text-align:left;display:flex;justify-content:space-between;align-items:center;gap:3px;transition:background .1s;}
+.bbtn:hover:not(:disabled){background:rgba(0,212,255,.05);color:var(--acc);}
+.bbtn:disabled{opacity:.22;cursor:not-allowed;}
+.bbtn.am{background:rgba(255,107,53,.08);color:var(--acc2);border-left:2px solid var(--acc2);}
+.bbtn .bic{width:16px;text-align:center;}
+.bbtn .bnm{flex:1;}
+.bbtn .bcs{font-size:.52rem;color:var(--dim);}
+
+/* RESOURCES */
+.rs-lbl{font-size:.52rem;color:var(--dim);letter-spacing:2px;padding:6px 9px 2px;border-top:1px solid var(--dim2);}
+.rs-lbl:first-child{border-top:none;padding-top:7px;}
+.rrow{display:flex;align-items:center;padding:3px 8px;border-bottom:1px solid var(--dim2);font-size:.64rem;gap:2px;}
+.rrow .ri{width:16px;font-size:.72rem;}
+.rrow .rl{flex:1;color:var(--text2);}
+.rrow .rv{font-family:var(--fh);font-size:.62rem;min-width:34px;text-align:right;}
+.rrow .rd{font-size:.54rem;min-width:30px;text-align:right;}
+.rrow .rd.p{color:var(--green);}
+.rrow .rd.n{color:var(--red);}
+.rrow .rd.z{color:var(--dim);}
+.rrow .rbar{width:36px;height:2px;background:var(--dim2);border-radius:1px;margin-left:3px;}
+.rrow .rbf{height:100%;border-radius:1px;transition:width .4s;}
+.sci-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.note{font-size:.54rem;color:var(--dim);padding:3px 9px 5px;font-style:italic;}
+
+/* TILE INFO */
+#tile-info{padding:8px;}
+.ti-name{font-family:var(--fh);font-size:.74rem;color:var(--acc);margin-bottom:1px;}
+.ti-sub{font-size:.54rem;color:var(--dim);letter-spacing:2px;margin-bottom:6px;}
+.ti-row{display:flex;justify-content:space-between;font-size:.61rem;padding:2px 0;border-bottom:1px solid var(--dim2);}
+.ti-row .tk{color:var(--dim);}
+.ti-row .tv{color:var(--acc);font-family:var(--fh);font-size:.58rem;}
+.act-btn{width:100%;margin-top:5px;background:transparent;border:1px solid var(--yellow);color:var(--yellow);font-family:var(--fn);font-size:.58rem;padding:5px;cursor:pointer;border-radius:2px;transition:all .12s;}
+.act-btn:hover:not(:disabled){background:var(--yellow);color:#000;}
+.act-btn:disabled{opacity:.26;cursor:not-allowed;}
+.act-btn.red{border-color:var(--red);color:var(--red);}
+.act-btn.red:hover{background:rgba(255,34,68,.12);}
+.recipe-item{display:flex;align-items:center;padding:4px 8px;border-bottom:1px solid var(--dim2);cursor:pointer;font-size:.61rem;gap:3px;transition:background .1s;}
+.recipe-item:hover{background:rgba(0,212,255,.04);}
+.recipe-item.ar{background:rgba(57,255,20,.07);border-left:2px solid var(--green);}
+.recipe-item .rn{flex:1;}
+.recipe-item .rio{color:var(--dim);font-size:.55rem;}
+
+/* LOG */
+#event-log{padding:5px 7px;}
+.li{font-size:.59rem;padding:2px 0;border-bottom:1px solid var(--dim2);line-height:1.4;}
+.lg{color:var(--green);}.lb{color:var(--red);}.ln{color:var(--yellow);}
+.lt{color:var(--dim);margin-right:3px;}
+
+/* MAP */
+#map-area{flex:1;position:relative;overflow:hidden;background:#010710;cursor:grab;}
+#map-area.grabbing{cursor:grabbing;}
+#hex-canvas{position:absolute;top:0;left:0;}
+#mode-ind{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:3px 12px;font-size:.56rem;color:var(--dim);letter-spacing:2px;pointer-events:none;z-index:5;}
+#mode-ind.on{border-color:var(--acc2);color:var(--acc2);}
+
+/* FULL PAGES */
+.full-page{display:none;position:absolute;inset:0;background:var(--bg);z-index:5;flex-direction:column;}
+.full-page.active{display:flex;}
+.fp-hdr{flex-shrink:0;padding:10px 14px 7px;border-bottom:1px solid var(--border);display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;}
+.fp-title{font-family:var(--fh);font-size:.95rem;color:var(--acc);text-shadow:0 0 14px var(--acc);letter-spacing:4px;}
+.fp-sub{font-size:.56rem;color:var(--dim);letter-spacing:2px;}
+.fp-stat{font-size:.62rem;}
+.fp-cw{flex:1;position:relative;overflow:hidden;cursor:grab;}
+.fp-cw.grabbing{cursor:grabbing;}
+
+/* TRADE */
+#trade-page{overflow-y:auto;}
+.trade-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px;}
+.tcard{background:var(--panel2);border:1px solid var(--border);border-radius:3px;padding:10px;}
+.tcard-title{font-family:var(--fh);font-size:.64rem;color:var(--acc);margin-bottom:5px;letter-spacing:2px;}
+.tr-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--dim2);font-size:.63rem;}
+.tr-row:last-child{border-bottom:none;}
+.tbtn2{font-family:var(--fn);font-size:.58rem;padding:3px 9px;background:transparent;border:1px solid var(--acc);color:var(--acc);cursor:pointer;border-radius:2px;transition:all .12s;}
+.tbtn2:hover:not(:disabled){background:var(--acc);color:#000;}
+.tbtn2:disabled{opacity:.26;cursor:not-allowed;}
+
+/* TOOLTIP */
+.ttbox{position:fixed;background:#071828;border:1px solid var(--acc);border-radius:3px;padding:8px 10px;font-size:.61rem;z-index:300;pointer-events:none;max-width:200px;line-height:1.6;display:none;}
+.ttbox.show{display:block;}
+.ttbox .ttn{font-family:var(--fh);font-size:.65rem;color:var(--acc);margin-bottom:2px;}
+.ttbox .ttd{color:var(--text);}
+.ttbox .ttc{color:var(--yellow);margin-top:2px;}
+.ttbox .tts{margin-top:2px;}
+
+/* NOTIFS */
+#nwrap{position:fixed;top:52px;right:7px;z-index:400;display:flex;flex-direction:column;gap:3px;pointer-events:none;}
+.notif{background:var(--panel);border:1px solid var(--acc);border-left:3px solid var(--acc);color:var(--acc);font-size:.63rem;padding:5px 9px;border-radius:2px;animation:nin .2s,nout .4s 2.6s forwards;max-width:215px;line-height:1.4;}
+.notif.bad{border-color:var(--red);color:var(--red);}
+.notif.warn{border-color:var(--yellow);color:var(--yellow);}
+@keyframes nin{from{transform:translateX(18px);opacity:0}to{transform:none;opacity:1}}
+@keyframes nout{to{transform:translateX(18px);opacity:0}}
+
+/* SCI LEGEND */
+.sci-legend{display:flex;flex-wrap:wrap;gap:4px;padding:6px 8px;border-bottom:1px solid var(--dim2);}
+.sci-chip{display:flex;align-items:center;gap:3px;font-size:.56rem;padding:2px 5px;border-radius:2px;border:1px solid;}
+
+#stars{position:fixed;inset:0;pointer-events:none;z-index:0;}
+.star{position:absolute;border-radius:50%;background:#fff;animation:tw var(--d) ease-in-out infinite;}
+@keyframes tw{0%,100%{opacity:var(--lo)}50%{opacity:.9}}
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:var(--panel);}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+</style>
+</head>
+<body>
+<div id="stars"></div>
+<div id="nwrap"></div>
+<div class="ttbox" id="ttbox">
+  <div class="ttn" id="tt-name"></div>
+  <div class="ttd" id="tt-desc"></div>
+  <div class="ttc" id="tt-cost"></div>
+  <div class="tts" id="tt-status"></div>
+</div>
+
+<div id="app">
+<div id="topbar">
+  <div class="logo">NOVA V</div>
+  <button class="tbtn active" id="tbtn-map" onclick="setPage('map')">◈ MAP</button>
+  <button class="tbtn" id="tbtn-research" onclick="setPage('research')">⬡ RESEARCH</button>
+  <button class="tbtn locked" id="tbtn-trade" onclick="setPage('trade')">⇄ TRADE</button>
+  <div class="chip">👥 <span class="cv" id="pop-v">4/6</span></div>
+  <div class="chip">⚙ <span class="cv" id="wrk-v">0/0</span></div>
+  <div class="cycle-wrap">
+    <span class="cyc-lbl">CYCLE</span>
+    <span class="cyc-num" id="cyc-n">001</span>
+    <button class="end-btn" onclick="endTurn()">⚡ END</button>
+  </div>
+</div>
+
+<div id="main">
+<div id="sidebar">
+  <div class="sb-tabs">
+    <button class="sb-tab active" id="sbt-build" onclick="setSB('build')">BUILD</button>
+    <button class="sb-tab" id="sbt-res" onclick="setSB('res')">RES</button>
+    <button class="sb-tab" id="sbt-tile" onclick="setSB('tile')">TILE</button>
+    <button class="sb-tab" id="sbt-log" onclick="setSB('log')">LOG</button>
+  </div>
+  <div class="sb-panel active" id="sbp-build"></div>
+  <div class="sb-panel" id="sbp-res"></div>
+  <div class="sb-panel" id="sbp-tile"><div id="tile-info"></div></div>
+  <div class="sb-panel" id="sbp-log"><div id="event-log"></div></div>
+</div>
+
+<div id="map-area">
+  <canvas id="hex-canvas"></canvas>
+  <div id="mode-ind">INSPECT</div>
+</div>
+
+<div class="full-page" id="research-page">
+  <div class="fp-hdr">
+    <div class="fp-title">RESEARCH NEXUS</div>
+    <div class="fp-sub">DRAG · HOVER · CLICK</div>
+    <div class="fp-stat" id="rp-sci-display"></div>
+  </div>
+  <div class="fp-cw" id="rcanvas-wrap"><canvas id="rcanvas"></canvas></div>
+</div>
+
+<div class="full-page" id="trade-page">
+  <div class="fp-hdr">
+    <div class="fp-title">TRADE HUB</div>
+    <div class="fp-sub">INTERSTELLAR COMMERCE</div>
+    <div class="fp-stat" id="trade-cap-info"></div>
+  </div>
+  <div class="trade-grid" id="trade-grid"></div>
+</div>
+</div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════
+//  CHROMATIC SCIENCE SYSTEM
+// ════════════════════════════════════════════════════
+// Seven science colors. "chroma" requires 1 of each other 6.
+const SCI_COLORS = {
+  sci_red:    {label:'Red Science',    color:'#ff4444', icon:'🔴'},
+  sci_green:  {label:'Green Science',  color:'#44ff88', icon:'🟢'},
+  sci_blue:   {label:'Blue Science',   color:'#4488ff', icon:'🔵'},
+  sci_yellow: {label:'Yellow Science', color:'#ffee44', icon:'🟡'},
+  sci_purple: {label:'Purple Science', color:'#cc44ff', icon:'🟣'},
+  sci_white:  {label:'White Science',  color:'#e0e8ff', icon:'⚪'},
+  sci_chroma: {label:'Chromatic Sci',  color:'#ffffff', icon:'🌈', gradient:true},
+};
+const SCI_BASIC   = ['sci_red','sci_green','sci_blue','sci_yellow'];
+const SCI_ADVANCED= ['sci_purple','sci_white','sci_chroma'];
+const SCI_ALL     = [...SCI_BASIC,...SCI_ADVANCED];
+
+// ════════════════════════════════════════════════════
+//  RESOURCES
+// ════════════════════════════════════════════════════
+const RES_DEF = {
+  // Ores
+  iron:     {label:'Iron Ore',     icon:'🪨', color:'#8a6040', unlock:null},
+  copper:   {label:'Copper Ore',   icon:'🟠', color:'#c06020', unlock:null},
+  coal:     {label:'Coal',         icon:'⬛', color:'#667',    unlock:'mining2'},
+  silicon:  {label:'Silicon',      icon:'🔷', color:'#4080a0', unlock:'mining2'},
+  titanium: {label:'Titanium Ore', icon:'🔵', color:'#5080c0', unlock:'deep_drill'},
+  rareearth:{label:'Rare Earth',   icon:'✦',  color:'#c040c0', unlock:'deep_drill'},
+  // Basic
+  energy:   {label:'Energy',       icon:'⚡', color:'#ffd700', unlock:null},
+  food:     {label:'Food',         icon:'🌿', color:'#39ff14', unlock:null},
+  water:    {label:'Water',        icon:'💧', color:'#4ae4ff', unlock:'pump'},
+  // Processed
+  steel:    {label:'Steel',        icon:'⚙',  color:'#8899aa', unlock:'unlock_furnace'},
+  copper_w: {label:'Copper Wire',  icon:'🔌', color:'#ff9900', unlock:'unlock_furnace'},
+  circuit:  {label:'Circuits',     icon:'🔲', color:'#00ccff', unlock:'unlock_factory'},
+  alloy:    {label:'Exotic Alloy', icon:'💠', color:'#cc44ff', unlock:'unlock_factory'},
+  polymer:  {label:'Polymers',     icon:'🧪', color:'#ff6688', unlock:'unlock_factory'},
+  nanomat:  {label:'Nanomaterials',icon:'⬡',  color:'#00ffcc', unlock:'factory_nano'},
+  darkmat:  {label:'Dark Matter',  icon:'✧',  color:'#8800ff', unlock:'dark_research'},
+  // Economy
+  credits:  {label:'Credits',      icon:'💰', color:'#ffd700', unlock:null},
+  // Science (all have unlock null — visible once obtained)
+  sci_red:    {label:'Red Science',    icon:'🔴', color:'#ff4444', unlock:null},
+  sci_green:  {label:'Green Science',  icon:'🟢', color:'#44ff88', unlock:null},
+  sci_blue:   {label:'Blue Science',   icon:'🔵', color:'#4488ff', unlock:null},
+  sci_yellow: {label:'Yellow Science', icon:'🟡', color:'#ffee44', unlock:null},
+  sci_purple: {label:'Purple Science', icon:'🟣', color:'#cc44ff', unlock:'adv_lab'},
+  sci_white:  {label:'White Science',  icon:'⚪', color:'#e0e8ff', unlock:'adv_lab'},
+  sci_chroma: {label:'Chromatic Sci',  icon:'🌈', color:'#ffffff', unlock:'adv_lab'},
+};
+
+// ════════════════════════════════════════════════════
+//  MATERIALS LAB RECIPES (basic science colors from ores)
+// ════════════════════════════════════════════════════
+const MATSLAB_RECIPES = [
+  {id:'ml_red',    name:'Iron Analysis',      unlock:null,             input:{iron:3,energy:2},       output:{sci_red:2},    desc:'Iron ore → Red Science'},
+  {id:'ml_green',  name:'Organic Chemistry',  unlock:null,             input:{food:4,water:2},        output:{sci_green:2},  desc:'Biomass → Green Science'},
+  {id:'ml_blue',   name:'Copper Spectroscopy',unlock:null,             input:{copper:3,energy:2},     output:{sci_blue:2},   desc:'Copper → Blue Science'},
+  {id:'ml_yellow', name:'Energy Physics',     unlock:null,             input:{energy:5},              output:{sci_yellow:3}, desc:'Pure energy → Yellow Science'},
+  {id:'ml_red2',   name:'Steel Metallurgy',   unlock:'unlock_furnace', input:{steel:2,energy:3},      output:{sci_red:5},    desc:'Steel → Red Science'},
+  {id:'ml_blue2',  name:'Circuit Analysis',   unlock:'unlock_factory', input:{circuit:1,energy:3},    output:{sci_blue:5},   desc:'Circuits → Blue Science'},
+  {id:'ml_green2', name:'Polymer Biology',    unlock:'unlock_factory', input:{polymer:2},             output:{sci_green:5},  desc:'Polymers → Green Science'},
+  {id:'ml_yellow2',name:'Alloy Resonance',    unlock:'unlock_factory', input:{alloy:1,energy:4},      output:{sci_yellow:6}, desc:'Alloys → Yellow Science'},
+];
+
+// ════════════════════════════════════════════════════
+//  RESEARCH LAB RECIPES (advanced science colors)
+// ════════════════════════════════════════════════════
+const RESLAB_RECIPES = [
+  {id:'rl_purple', name:'Xenobiology',       unlock:'adv_lab',        input:{sci_red:3,sci_green:3},  output:{sci_purple:2}, desc:'Red+Green → Purple Science'},
+  {id:'rl_white',  name:'Quantum Optics',    unlock:'adv_lab',        input:{sci_blue:3,sci_yellow:3},output:{sci_white:2},  desc:'Blue+Yellow → White Science'},
+  {id:'rl_purple2',name:'Deep Xenobiology',  unlock:'deep_adv_lab',   input:{sci_red:6,sci_green:4,nanomat:1}, output:{sci_purple:6}, desc:'Nanomat-boosted Purple'},
+  {id:'rl_white2', name:'Unified Theory',    unlock:'deep_adv_lab',   input:{sci_blue:6,sci_yellow:4,circuit:2},output:{sci_white:6}, desc:'Advanced White Science'},
+  {id:'rl_chroma', name:'Chromatic Synthesis',unlock:'chroma_unlock', input:{sci_red:2,sci_green:2,sci_blue:2,sci_yellow:2,sci_purple:1,sci_white:1}, output:{sci_chroma:1}, desc:'One of each → Chromatic'},
+];
+
+// ════════════════════════════════════════════════════
+//  FURNACE RECIPES
+// ════════════════════════════════════════════════════
+const FURNACE_RECIPES = [
+  {id:'f_steel',  name:'Smelt Steel',         unlock:null,             input:{iron:4,energy:3},           output:{steel:2},    desc:'Basic smelting'},
+  {id:'f_copper', name:'Copper Wire',          unlock:'furnace_copper', input:{copper:3,energy:2},         output:{copper_w:2}, desc:'Draw wire'},
+  {id:'f_steel2', name:'Coal Steel',           unlock:'furnace_steel',  input:{iron:3,coal:2,energy:4},    output:{steel:4},    desc:'Coal-boosted'},
+  {id:'f_si',     name:'Silicon Wafers',       unlock:'furnace_si',     input:{silicon:3,energy:5},        output:{circuit:1},  desc:'Silicon refining'},
+  {id:'f_titan',  name:'Titanium Ingots',      unlock:'furnace_titan',  input:{titanium:3,energy:6,coal:1},output:{alloy:2},    desc:'Titanium processing'},
+  {id:'f_exotic', name:'Exotic Alloy Synth',   unlock:'furnace_exotic', input:{rareearth:2,titanium:2,energy:8},output:{alloy:4},desc:'Rare earth alloys'},
+];
+
+// ════════════════════════════════════════════════════
+//  FACTORY RECIPES
+// ════════════════════════════════════════════════════
+const FACTORY_RECIPES = [
+  {id:'fc_circuit',name:'Circuits',            unlock:null,             input:{copper_w:2,silicon:2,energy:4},  output:{circuit:2},  desc:'Basic circuits'},
+  {id:'fc_polymer',name:'Polymers',            unlock:'factory_polymer',input:{coal:3,energy:5},                output:{polymer:2},  desc:'Industrial polymers'},
+  {id:'fc_alloy',  name:'Exotic Alloys',       unlock:'factory_alloy',  input:{steel:2,rareearth:1,energy:6},   output:{alloy:2},    desc:'High-grade alloys'},
+  {id:'fc_nano',   name:'Nanomaterials',       unlock:'factory_nano',   input:{alloy:2,circuit:2,energy:10},    output:{nanomat:1},  desc:'Nano assembly'},
+  {id:'fc_dark',   name:'Dark Matter Trap',    unlock:'dark_research',  input:{nanomat:2,energy:20,circuit:3},  output:{darkmat:1},  desc:'Exotic matter capture'},
+];
+
+// ════════════════════════════════════════════════════
+//  BUILDINGS
+// ════════════════════════════════════════════════════
+const BDEF = {
+  // LOGISTICS
+  road:{name:'Road',icon:'━',group:'logistics',workers:0,unlock:null,
+    levels:[{cost:{iron:6},cap:20,desc:'Connects buildings. Workers use roads to commute. +12% output to adjacent buildings.'}]},
+  conveyor:{name:'Conveyor Belt',icon:'⇒',group:'logistics',workers:0,unlock:'automation',
+    levels:[
+      {cost:{steel:4,energy:6},cap:15,desc:'Auto transport, no workers needed. Cap: 15/cycle.'},
+      {cost:{alloy:8,energy:10},cap:40,desc:'Cap: 40/cycle.',req:'nanotech'},
+    ]},
+  // EXTRACTION
+  mine:{name:'Mining Rig',icon:'⛏',group:'extraction',workers:3,unlock:null,
+    levels:[
+      {cost:{iron:20,energy:8},prod:{iron:8,copper:4},desc:'Produces Iron + Copper ore'},
+      {cost:{steel:12,energy:15},prod:{iron:14,copper:8,coal:4},desc:'+Coal ore',req:'mining2'},
+      {cost:{alloy:10,steel:15,energy:25},prod:{iron:18,copper:10,coal:6,silicon:4,titanium:2},desc:'+Silicon+Titanium',req:'deep_drill'},
+    ]},
+  solar:{name:'Solar Array',icon:'☀',group:'extraction',workers:1,unlock:null,
+    levels:[
+      {cost:{iron:18},prod:{energy:8},desc:'+8 energy/cycle'},
+      {cost:{steel:8,energy:8},prod:{energy:20},desc:'+20 energy',req:'solar2'},
+      {cost:{circuit:6,alloy:10,energy:15},prod:{energy:45},desc:'+45 energy',req:'fusion'},
+    ]},
+  farm:{name:'Hydro Farm',icon:'🌿',group:'extraction',workers:2,unlock:null,
+    levels:[
+      {cost:{iron:18,energy:6},prod:{food:7},desc:'+7 food/cycle'},
+      {cost:{steel:8,copper_w:4,energy:12},prod:{food:16},desc:'+16 food',req:'bioeng'},
+      {cost:{polymer:8,circuit:4,energy:22},prod:{food:34},desc:'+34 food',req:'nanoagri'},
+    ]},
+  pump:{name:'Water Pump',icon:'💧',group:'extraction',workers:1,unlock:'pump',
+    levels:[
+      {cost:{iron:16,energy:5},prod:{water:8},desc:'+8 water/cycle'},
+      {cost:{steel:8,copper_w:3,energy:10},prod:{water:20},desc:'+20 water',req:'hydro2'},
+    ]},
+  miner_rare:{name:'Rare Earth Miner',icon:'✦',group:'extraction',workers:4,unlock:'deep_drill',
+    levels:[
+      {cost:{steel:20,circuit:8,energy:20},prod:{rareearth:3,titanium:4},desc:'+Rare earth+Titanium'},
+    ]},
+  // PROCESSING
+  matslab:{name:'Materials Lab',icon:'🧫',group:'processing',workers:2,unlock:null,
+    levels:[
+      {cost:{iron:22,energy:8},desc:'Analyzes materials → colored science (select recipe)'},
+      {cost:{steel:14,copper_w:6,energy:15},desc:'Advanced analysis',req:'adv_matslab'},
+    ]},
+  furnace:{name:'Furnace',icon:'🔥',group:'processing',workers:3,unlock:'unlock_furnace',
+    levels:[
+      {cost:{iron:35,energy:12},desc:'Smelts ores (select recipe)'},
+      {cost:{steel:18,energy:20},desc:'Advanced smelting',req:'metallurgy2'},
+    ]},
+  factory:{name:'Factory',icon:'🏭',group:'processing',workers:5,unlock:'unlock_factory',
+    levels:[
+      {cost:{steel:30,copper_w:15,energy:25},desc:'Manufactures materials (select recipe)'},
+      {cost:{alloy:15,circuit:10,energy:35},desc:'Advanced manufacturing',req:'industry2'},
+    ]},
+  // COLONY
+  hab:{name:'Habitat Dome',icon:'🏠',group:'colony',workers:0,unlock:null,
+    levels:[
+      {cost:{iron:28,energy:10},pop:3,workerSlots:2,desc:'+3 pop cap, +2 worker slots'},
+      {cost:{steel:14,copper_w:6,energy:18},pop:7,workerSlots:5,desc:'+7 pop',req:'life_support'},
+      {cost:{polymer:12,circuit:8,energy:35},pop:15,workerSlots:12,desc:'+15 pop',req:'arcology'},
+    ]},
+  reslab:{name:'Research Lab',icon:'🔬',group:'colony',workers:3,unlock:'unlock_reslab',
+    levels:[
+      {cost:{steel:22,copper_w:8,energy:18},desc:'Advanced science synthesis (select recipe)'},
+      {cost:{alloy:18,nanomat:4,energy:45},desc:'Deep research',req:'deep_adv_lab'},
+    ]},
+  refinery:{name:'Refinery',icon:'🏪',group:'colony',workers:2,unlock:'trade_net',
+    levels:[
+      {cost:{steel:20,energy:16},prod:{credits:8},desc:'+8 credits/cycle'},
+      {cost:{alloy:10,circuit:6,energy:25},prod:{credits:22},desc:'+22 credits',req:'trade2'},
+    ]},
+  turret:{name:'Defense Turret',icon:'🛡',group:'colony',workers:1,unlock:'weapons',
+    levels:[
+      {cost:{steel:20,copper_w:8,energy:8},defense:4,desc:'+4 defense'},
+      {cost:{alloy:12,circuit:8,energy:18},defense:10,desc:'+10 defense',req:'weapons2'},
+    ]},
+  stockpile:{name:'Stockpile',icon:'📦',group:'colony',workers:1,unlock:null,
+    levels:[
+      {cost:{iron:24,energy:4},globalStorage:200,desc:'Reveals advanced resources. Storage +200.'},
+      {cost:{steel:16,energy:10},globalStorage:600,desc:'Storage +600',req:'logistics2'},
+    ]},
+  comms:{name:'Comms Array',icon:'📡',group:'colony',workers:1,unlock:null,
+    levels:[
+      {cost:{iron:18,copper_w:6,energy:5},tradeCap:2,prod:{credits:3},desc:'Trade capacity +2. Unlocks Trade Hub.'},
+      {cost:{steel:14,circuit:8,energy:15},tradeCap:5,prod:{credits:8},desc:'Trade cap +5',req:'deep_comms'},
+    ]},
+  // ADVANCED
+  elevator:{name:'Space Elevator',icon:'🛗',group:'advanced',workers:8,unlock:'space_elevator',
+    levels:[
+      {cost:{alloy:60,nanomat:20,circuit:30,energy:80},tradeCap:20,desc:'Trade capacity +20.'},
+    ]},
+  extractor:{name:'Dark Matter Extractor',icon:'✦',group:'advanced',workers:6,unlock:'dark_research',
+    levels:[
+      {cost:{alloy:40,nanomat:15,circuit:20,energy:60},prod:{darkmat:2},desc:'+2 dark matter/cycle'},
+    ]},
+};
+
+const BUILD_GROUPS={logistics:'LOGISTICS',extraction:'EXTRACTION',processing:'PROCESSING',colony:'COLONY',advanced:'ADVANCED'};
+
+// ════════════════════════════════════════════════════
+//  RESEARCH TREE
+//  cost is now per-color: {sci_red:N, sci_blue:N, ...}
+//  repeat tracks purchase count in G.repeatCounts
+// ════════════════════════════════════════════════════
+const RTREE = [
+  // Row 0 — basic, costs only basic science
+  {id:'mining2',       name:'Advanced Mining',    icon:'⛏', pos:[1,0],  prereqs:[],                           cost:{sci_red:12},        desc:'Unlocks Mine Lv2 (coal+silicon). Reveals coal and silicon ore.', effect:'Mine → Lv2'},
+  {id:'solar2',        name:'Solar Amplifiers',   icon:'☀', pos:[3,0],  prereqs:[],                           cost:{sci_yellow:10},     desc:'Unlocks Solar Array Lv2.', effect:'Solar → Lv2'},
+  {id:'life_support',  name:'Life Support',       icon:'🏠', pos:[5,0],  prereqs:[],                           cost:{sci_green:10},      desc:'Unlocks Habitat Lv2. Population eats 20% less food.', effect:'Habitat → Lv2'},
+  {id:'pump',          name:'Hydro Engineering',  icon:'💧', pos:[7,0],  prereqs:[],                           cost:{sci_blue:8},        desc:'Unlocks Water Pump building.', effect:'Unlock: Water Pump'},
+  {id:'weapons',       name:'Weapons Tech',       icon:'🛡', pos:[9,0],  prereqs:[],                           cost:{sci_red:10},        desc:'Unlocks Defense Turret.', effect:'Unlock: Turret'},
+  // Row 1
+  {id:'unlock_furnace',name:'Metallurgy',         icon:'🔥', pos:[0,1],  prereqs:['mining2'],                  cost:{sci_red:18,sci_yellow:8},desc:'Unlocks Furnace building. Basic iron smelting available from start.', effect:'Unlock: Furnace'},
+  {id:'furnace_copper',name:'Copper Processing',  icon:'🔌', pos:[1,1],  prereqs:['unlock_furnace'],           cost:{sci_blue:12},       desc:'Furnace recipe: Copper → Wire.', effect:'Recipe: Copper Wire'},
+  {id:'furnace_steel', name:'Coal Smelting',      icon:'⚙',  pos:[2,1],  prereqs:['unlock_furnace','mining2'], cost:{sci_red:15},        desc:'Furnace recipe: Coal-boosted steel smelting.', effect:'Recipe: Coal Steel'},
+  {id:'bioeng',        name:'Bio Engineering',    icon:'🌿', pos:[4,1],  prereqs:['life_support'],             cost:{sci_green:20},      desc:'Unlocks Farm Lv2.', effect:'Farm → Lv2'},
+  {id:'hydro2',        name:'Hydro Systems II',   icon:'💧', pos:[6,1],  prereqs:['pump'],                     cost:{sci_blue:14},       desc:'Unlocks Water Pump Lv2.', effect:'Pump → Lv2'},
+  {id:'adv_matslab',   name:'Advanced Analysis',  icon:'🧫', pos:[8,1],  prereqs:['mining2'],                  cost:{sci_red:8,sci_blue:8},desc:'Unlocks Materials Lab Lv2. More analysis recipes.', effect:'Materials Lab → Lv2'},
+  // Row 2
+  {id:'metallurgy2',   name:'Advanced Metallurgy',icon:'🔩', pos:[1,2],  prereqs:['furnace_steel','furnace_copper'],cost:{sci_red:22,sci_yellow:12},desc:'Unlocks Furnace Lv2.', effect:'Furnace → Lv2'},
+  {id:'unlock_factory',name:'Industrialization',  icon:'🏭', pos:[3,2],  prereqs:['furnace_copper','furnace_steel'],cost:{sci_red:20,sci_blue:15},desc:'Unlocks Factory building. Basic circuit recipe available.', effect:'Unlock: Factory'},
+  {id:'automation',    name:'Automation',         icon:'⚙',  pos:[2,2],  prereqs:['unlock_factory'],           cost:{sci_yellow:22,sci_blue:18},desc:'Unlocks Conveyor Belt.', effect:'Unlock: Conveyor'},
+  {id:'unlock_reslab', name:'Advanced Research',  icon:'🔬', pos:[5,2],  prereqs:['adv_matslab'],              cost:{sci_red:15,sci_green:15,sci_blue:15,sci_yellow:15},desc:'Unlocks Research Lab building. Produces advanced (Purple/White) science.', effect:'Unlock: Research Lab'},
+  {id:'trade_net',     name:'Trade Network',      icon:'💰', pos:[7,2],  prereqs:['life_support','hydro2'],    cost:{sci_green:18,sci_yellow:12},desc:'Unlocks Refinery building (+credits/cycle). Comms Array already available.', effect:'Unlock: Refinery'},
+  {id:'weapons2',      name:'Advanced Weapons',   icon:'🛡', pos:[9,2],  prereqs:['weapons','unlock_factory'], cost:{sci_red:20,sci_blue:15},desc:'Unlocks Turret Lv2.', effect:'Turret → Lv2'},
+  // Row 3
+  {id:'deep_drill',    name:'Deep Core Drill',    icon:'🪨', pos:[0,3],  prereqs:['metallurgy2'],              cost:{sci_red:35,sci_yellow:20},desc:'Unlocks Mine Lv3. Reveals titanium and rare earth deposits.', effect:'Mine → Lv3'},
+  {id:'furnace_si',    name:'Silicon Refining',   icon:'🔷', pos:[1,3],  prereqs:['metallurgy2','mining2'],    cost:{sci_blue:25,sci_yellow:18},desc:'Furnace recipe: Silicon → Circuit wafers.', effect:'Recipe: Silicon Wafers'},
+  {id:'furnace_titan', name:'Titanium Refining',  icon:'🔵', pos:[2,3],  prereqs:['metallurgy2','deep_drill'], cost:{sci_red:30,sci_yellow:22},desc:'Furnace recipe: Titanium → Alloy ingots.', effect:'Recipe: Titanium Ingots'},
+  {id:'factory_polymer',name:'Polymer Synthesis', icon:'🧪', pos:[3,3],  prereqs:['automation','unlock_factory'],cost:{sci_green:25,sci_yellow:20},desc:'Factory recipe: Coal → Polymers.', effect:'Recipe: Polymers'},
+  {id:'factory_alloy', name:'Alloy Forging',      icon:'💠', pos:[4,3],  prereqs:['furnace_titan','unlock_factory'],cost:{sci_red:28,sci_blue:22},desc:'Factory recipe: Steel+Rare earth → Exotic Alloys.', effect:'Recipe: Exotic Alloys'},
+  {id:'adv_lab',       name:'Chromatic Precursor',icon:'🌐', pos:[5,3],  prereqs:['unlock_reslab'],            cost:{sci_red:20,sci_green:20,sci_blue:20,sci_yellow:20},desc:'Unlocks Research Lab advanced recipes (Purple+White science). Required for Chromatic research.', effect:'Unlock: Purple/White science'},
+  {id:'logistics2',    name:'Logistics Network',  icon:'📦', pos:[7,3],  prereqs:['automation'],               cost:{sci_yellow:25,sci_blue:18},desc:'Unlocks Stockpile Lv2. Roads gain +50% capacity.', effect:'Stockpile → Lv2'},
+  {id:'deep_comms',    name:'Deep Space Comms',   icon:'📡', pos:[8,3],  prereqs:['trade_net'],                cost:{sci_blue:28,sci_green:20},desc:'Unlocks Comms Array Lv2. Extends trade range and capacity.', effect:'Comms → Lv2'},
+  // Row 4
+  {id:'nanotech',      name:'Nanotechnology',     icon:'⬡',  pos:[2,4],  prereqs:['factory_alloy','factory_polymer'],cost:{sci_blue:40,sci_purple:10},desc:'Unlocks Conveyor Lv2. Nano-enhanced belts. Requires Purple science.', effect:'Conveyor → Lv2'},
+  {id:'furnace_exotic',name:'Exotic Refining',    icon:'✦',  pos:[1,4],  prereqs:['furnace_titan','deep_drill'],cost:{sci_red:40,sci_purple:8},desc:'Furnace recipe: Rare earth + Titanium → Exotic Alloy synthesis.', effect:'Recipe: Exotic Alloy Synth'},
+  {id:'factory_nano',  name:'Nano Manufacturing', icon:'⬡',  pos:[3,4],  prereqs:['nanotech','factory_alloy'], cost:{sci_blue:45,sci_purple:15},desc:'Factory recipe: Alloy+Circuit → Nanomaterials.', effect:'Recipe: Nanomaterials'},
+  {id:'ai_core',       name:'AI Research Core',   icon:'🤖', pos:[5,4],  prereqs:['adv_lab'],                  cost:{sci_purple:20,sci_white:20},desc:'Unlocks Research Lab Lv2. AI generates passive science each cycle.', effect:'Research Lab → Lv2 + passive sci'},
+  {id:'fusion',        name:'Fusion Power',       icon:'⚡', pos:[4,4],  prereqs:['factory_alloy','solar2'],   cost:{sci_yellow:40,sci_white:15},desc:'Unlocks Solar Lv3. Reduces colony energy consumption by 20%.', effect:'Solar → Lv3'},
+  {id:'space_elevator',name:'Space Elevator',     icon:'🛗', pos:[7,4],  prereqs:['nanotech','deep_comms'],    cost:{sci_blue:50,sci_purple:25,sci_white:20},desc:'Unlocks Space Elevator building. Adds +20 trade capacity.', effect:'Unlock: Space Elevator'},
+  {id:'arcology',      name:'Arcology',           icon:'🏙', pos:[9,4],  prereqs:['life_support','bioeng','factory_polymer'],cost:{sci_green:45,sci_white:18},desc:'Unlocks Habitat Lv3. Massive population capacity.', effect:'Habitat → Lv3'},
+  {id:'nanoagri',      name:'Nano Agriculture',   icon:'🌱', pos:[10,4], prereqs:['bioeng','nanotech'],        cost:{sci_green:40,sci_purple:12},desc:'Unlocks Farm Lv3.', effect:'Farm → Lv3'},
+  // Row 5
+  {id:'dark_research', name:'Dark Matter Study',  icon:'✧',  pos:[3,5],  prereqs:['factory_nano','fusion'],    cost:{sci_purple:40,sci_white:40},desc:'Unlocks Dark Matter Extractor. Unlocks dark matter Factory/Lab recipes.', effect:'Unlock: Extractor'},
+  {id:'industry2',     name:'Industry II',        icon:'🏭', pos:[2,5],  prereqs:['factory_nano'],             cost:{sci_yellow:50,sci_purple:20},desc:'Unlocks Factory Lv2.', effect:'Factory → Lv2'},
+  {id:'trade2',        name:'Trade Expansion',    icon:'💰', pos:[7,5],  prereqs:['space_elevator'],           cost:{sci_green:40,sci_white:30},desc:'Unlocks Refinery Lv2 (+22 credits/cycle).', effect:'Refinery → Lv2'},
+  {id:'deep_adv_lab',  name:'Deep Research',      icon:'🔬', pos:[5,5],  prereqs:['ai_core','dark_research'],  cost:{sci_purple:30,sci_white:30},desc:'Unlocks Research Lab advanced recipes for Purple/White science at higher yield.', effect:'Advanced Lab recipes'},
+  {id:'chroma_unlock', name:'Chromatic Theory',   icon:'🌈', pos:[4,5],  prereqs:['adv_lab','dark_research'],  cost:{sci_purple:25,sci_white:25},desc:'Unlocks Chromatic Science synthesis recipe in Research Lab. Required for all Repeatable research.', effect:'Unlock: Chromatic recipe'},
+  // Row 6 — repeatable, cost chromatic science + escalates
+  {id:'rep_mine',    name:'[∞] Mining Efficiency',icon:'⛏', pos:[1,6],  prereqs:['chroma_unlock'],            cost:{sci_chroma:1},     desc:'REPEATABLE: +8% mining output per purchase. Cost increases each time.', effect:'+8% mine output', repeat:true, baseBoost:{mine:0.08}},
+  {id:'rep_solar',   name:'[∞] Solar Focus',      icon:'☀', pos:[3,6],  prereqs:['chroma_unlock'],            cost:{sci_chroma:1},     desc:'REPEATABLE: +10% solar energy per purchase.', effect:'+10% solar output', repeat:true, baseBoost:{solar:0.10}},
+  {id:'rep_farm',    name:'[∞] Nano Harvest',     icon:'🌿', pos:[5,6],  prereqs:['chroma_unlock'],            cost:{sci_chroma:1},     desc:'REPEATABLE: +8% farm output per purchase.', effect:'+8% farm output', repeat:true, baseBoost:{farm:0.08}},
+  {id:'rep_factory', name:'[∞] Factory Overclk',  icon:'🏭', pos:[7,6],  prereqs:['chroma_unlock','industry2'],cost:{sci_chroma:2},    desc:'REPEATABLE: +12% factory output per purchase.', effect:'+12% factory output', repeat:true, baseBoost:{factory:0.12}},
+  {id:'rep_matslab', name:'[∞] Lab Efficiency',   icon:'🧫', pos:[9,6],  prereqs:['chroma_unlock'],            cost:{sci_chroma:1},     desc:'REPEATABLE: +10% all science production per purchase.', effect:'+10% sci output', repeat:true, baseBoost:{matslab:0.10,reslab:0.10}},
+];
+
+// ════════════════════════════════════════════════════
+//  TRADE
+// ════════════════════════════════════════════════════
+const TRADE_CATALOG = [
+  {id:'buy_iron',   name:'Import Iron',      buy:{credits:15}, give:{iron:20},     minCap:1},
+  {id:'buy_copper', name:'Import Copper',    buy:{credits:12}, give:{copper:15},   minCap:1},
+  {id:'buy_energy', name:'Import Energy',    buy:{credits:18}, give:{energy:25},   minCap:1},
+  {id:'buy_food',   name:'Import Food',      buy:{credits:10}, give:{food:15},     minCap:1},
+  {id:'sell_iron',  name:'Export Iron',      buy:{iron:20},    give:{credits:12},  minCap:1},
+  {id:'sell_steel', name:'Export Steel',     buy:{steel:8},    give:{credits:25},  minCap:1},
+  {id:'sell_circuit',name:'Export Circuits', buy:{circuit:5},  give:{credits:35},  minCap:2},
+  {id:'sell_alloy', name:'Export Alloy',     buy:{alloy:4},    give:{credits:50},  minCap:2},
+  {id:'buy_rare',   name:'Import Rare Earth',buy:{credits:40}, give:{rareearth:5}, minCap:2},
+  {id:'sell_nano',  name:'Export Nanomat',   buy:{nanomat:3},  give:{credits:90},  minCap:3},
+  {id:'buy_nano',   name:'Import Nanomat',   buy:{credits:80}, give:{nanomat:2},   minCap:3},
+];
+
+// ════════════════════════════════════════════════════
+//  TERRAIN
+// ════════════════════════════════════════════════════
+const TERRAIN={
+  plains:  {label:'Plains',       fill:'#081c2e',stroke:'#0d3550',passable:true, bonus:{}},
+  crater:  {label:'Crater',       fill:'#1a1108',stroke:'#3d2a0a',passable:true, bonus:{iron:3,copper:2}},
+  ice:     {label:'Ice Vein',     fill:'#081828',stroke:'#1a4a70',passable:true, bonus:{water:3,food:2}},
+  volcanic:{label:'Volcanic',     fill:'#1a0906',stroke:'#5a1a08',passable:true, bonus:{energy:4,coal:2}},
+  anomaly: {label:'Anomaly',      fill:'#100818',stroke:'#4a1575',passable:true, bonus:{sci_purple:1,sci_blue:1}},
+  crystal: {label:'Crystal',      fill:'#061616',stroke:'#0a4a4a',passable:true, bonus:{sci_yellow:2,rareearth:1}},
+  ruins:   {label:'Alien Ruins',  fill:'#0a1008',stroke:'#1a4018',passable:true, bonus:{sci_red:2,sci_green:2,credits:2}},
+  mountain:{label:'Mountain',     fill:'#111418',stroke:'#2a2e34',passable:false,bonus:{iron:5,titanium:1}},
+  ocean:   {label:'Ocean',        fill:'#020c18',stroke:'#04233a',passable:false,bonus:{water:5}},
+  coast:   {label:'Coastal',      fill:'#041220',stroke:'#083858',passable:true, bonus:{food:3,water:2}},
+};
+
+// ════════════════════════════════════════════════════
+//  GAME STATE
+// ════════════════════════════════════════════════════
+const MCOLS=26,MROWS=20,HSZ=34;
+
+function zeroRes(){
+  return {iron:0,copper:0,coal:0,silicon:0,titanium:0,rareearth:0,
+          energy:0,food:0,water:0,
+          steel:0,copper_w:0,circuit:0,alloy:0,polymer:0,nanomat:0,darkmat:0,
+          credits:0,
+          sci_red:0,sci_green:0,sci_blue:0,sci_yellow:0,sci_purple:0,sci_white:0,sci_chroma:0};
+}
+
+let G={
+  turn:1,
+  res:    Object.assign(zeroRes(),{iron:120,copper:60,energy:80,food:60,credits:30}),
+  income: zeroRes(),
+  pop:{cur:4,cap:6},
+  workers:{total:0,used:0},
+  defense:0,
+  hasComms:false,tradeCap:0,hasElevator:false,hasStockpile:false,
+  techs:new Set(),
+  repeatCounts:{},  // id→count
+  repBoosts:{},     // bkey→multiplier
+  buildMode:null,selectedKey:null,
+  tiles:{},
+  tileRecipes:{},   // key→{matslab/furnace/factory/reslab: recipeId}
+  log:[{t:0,msg:'Colony Omega established. Build a Materials Lab to begin science.',type:'n'}],
+  tradeOffers:[],tradeDone:0,
+};
+
+// ════════════════════════════════════════════════════
+//  HEX MATH
+// ════════════════════════════════════════════════════
+const KS=',';
+const k=(q,r)=>`${q}${KS}${r}`;
+function hexPx(q,r){return{x:HSZ*1.732*(q+r*0.5),y:HSZ*1.5*r};}
+function pxHex(x,y){const r=y/(HSZ*1.5),q=x/(HSZ*1.732)-r*0.5;return cubeRound(q,r);}
+function cubeRound(q,r){const s=-q-r;let rq=Math.round(q),rr=Math.round(r),rs=Math.round(s);const dq=Math.abs(rq-q),dr=Math.abs(rr-r),ds=Math.abs(rs-s);if(dq>dr&&dq>ds)rq=-rr-rs;else if(dr>ds)rr=-rq-rs;return{q:rq,r:rr};}
+function hexNbs(q,r){return[{q:q+1,r},{q:q-1,r},{q,r:r+1},{q,r:r-1},{q:q+1,r:r-1},{q:q-1,r:r+1}];}
+function hexDist(q1,r1,q2,r2){return(Math.abs(q1-q2)+Math.abs(r1-r2)+Math.abs(q1+r1-q2-r2))/2;}
+function hexPts(cx,cy,sz){const p=[];for(let i=0;i<6;i++){const a=Math.PI/180*(60*i-30);p.push([cx+sz*Math.cos(a),cy+sz*Math.sin(a)]);}return p;}
+
+// ════════════════════════════════════════════════════
+//  MAP GEN
+// ════════════════════════════════════════════════════
+function genMap(){
+  const seeds=[];
+  for(let i=0;i<3;i++) seeds.push({q:Math.floor(Math.random()*MCOLS),r:Math.floor(Math.random()*MROWS),rad:2+Math.floor(Math.random()*3)});
+  for(let r=0;r<MROWS;r++) for(let q=0;q<MCOLS;q++){
+    const key=k(q,r);
+    let ocean=false,coast=false;
+    for(const s of seeds){const d=hexDist(q,r,s.q,s.r);if(d<=s.rad-1){ocean=true;break;}if(d<=s.rad) coast=true;}
+    let terrain;
+    if(ocean) terrain='ocean';
+    else if(coast) terrain='coast';
+    else{const n=Math.random();
+      if(n<.40) terrain='plains';
+      else if(n<.53) terrain='crater';
+      else if(n<.62) terrain='ice';
+      else if(n<.70) terrain='volcanic';
+      else if(n<.76) terrain='mountain';
+      else if(n<.82) terrain='anomaly';
+      else if(n<.88) terrain='crystal';
+      else terrain='ruins';}
+    G.tiles[key]={terrain,building:null,level:0};
+  }
+  const cx=Math.floor(MCOLS/2),cy=Math.floor(MROWS/2);
+  // Flatten start area
+  for(let dq=-4;dq<=4;dq++) for(let dr=-3;dr<=3;dr++){
+    const tk=k(cx+dq,cy+dr);
+    if(G.tiles[tk]){
+      const t=TERRAIN[G.tiles[tk].terrain];
+      if(!t.passable) G.tiles[tk].terrain='plains';
+    }
+  }
+  // Starting buildings
+  G.tiles[k(cx,cy)]    ={terrain:'plains',building:'hab',    level:0};
+  G.tiles[k(cx+1,cy)]  ={terrain:'plains',building:'solar',  level:0};
+  G.tiles[k(cx-1,cy+1)]={terrain:'crater', building:'mine',   level:0};
+  G.tiles[k(cx,cy-1)]  ={terrain:'plains',building:'matslab',level:0};
+  G.tiles[k(cx-1,cy)]  ={terrain:'plains',building:'road',   level:0};
+  G.tiles[k(cx+1,cy-1)]={terrain:'plains',building:'farm',   level:0};
+  G.tileRecipes[k(cx,cy-1)]={matslab:'ml_red'};
+  recalcAll();
+}
+
+// ════════════════════════════════════════════════════
+//  UNLOCK HELPERS
+// ════════════════════════════════════════════════════
+function hasT(id){return G.techs.has(id);}
+function bUnlocked(bkey){const b=BDEF[bkey];if(!b) return false;return !b.unlock||hasT(b.unlock);}
+function b_group_match(bkey,gkey){const b=BDEF[bkey];return b&&b.group===gkey&&bUnlocked(bkey);}
+function resVisible(rkey){
+  const rd=RES_DEF[rkey];if(!rd) return false;
+  const val=(G.res[rkey]||0),inc=(G.income[rkey]||0);
+  if(!rd.unlock) return val>0||inc>0;
+  return hasT(rd.unlock)&&(val>0||inc>0||G.hasStockpile);
+}
+
+// ════════════════════════════════════════════════════
+//  ROAD / WORKER NETWORK
+//  Roads need workers based on throughput (materials flowing).
+//  Workers must have a road-connected path from their workplace to a Hab.
+// ════════════════════════════════════════════════════
+function getRoadSet(){return new Set(Object.entries(G.tiles).filter(([,t])=>t.building==='road').map(([k])=>k));}
+function getConvSet(){return new Set(Object.entries(G.tiles).filter(([,t])=>t.building==='conveyor').map(([k])=>k));}
+
+// BFS: is key reachable from any Hab via roads/conveyors?
+function isHabConnected(startKey){
+  const roads=getRoadSet();const convs=getConvSet();
+  const net=new Set([...roads,...convs]);
+  // find all hab keys
+  const habs=new Set(Object.entries(G.tiles).filter(([,t])=>t.building==='hab').map(([k])=>k));
+  if(!habs.size) return false;
+  // BFS from start through network
+  const visited=new Set([startKey]);
+  const queue=[startKey];
+  while(queue.length){
+    const cur=queue.shift();
+    if(habs.has(cur)) return true;
+    const[cq,cr]=cur.split(KS).map(Number);
+    for(const nb of hexNbs(cq,cr)){
+      const nk=k(nb.q,nb.r);
+      if(visited.has(nk)) continue;
+      // Can traverse through: roads, conveyors, or the hab itself
+      if(net.has(nk)||habs.has(nk)||nk===startKey){visited.add(nk);queue.push(nk);}
+    }
+  }
+  return false;
+}
+
+// How much material flows through a road tile (estimate from adjacent producers)
+function roadThroughput(rq,rr){
+  let flow=0;
+  for(const nb of hexNbs(rq,rr)){
+    const t=G.tiles[k(nb.q,nb.r)];
+    if(!t||!t.building) continue;
+    const bd=BDEF[t.building];if(!bd||!bd.levels[t.level].prod) continue;
+    const totalProd=Object.values(bd.levels[t.level].prod).reduce((a,b)=>a+b,0);
+    flow+=totalProd;
+  }
+  return flow;
+}
+
+// Workers needed per road tile: 1 per 10 units of material throughput, min 0
+function roadWorkerCost(rq,rr){
+  return Math.max(0,Math.ceil(roadThroughput(rq,rr)/10));
+}
+
+// ════════════════════════════════════════════════════
+//  RECALC
+// ════════════════════════════════════════════════════
+function recalcAll(){
+  G.income=zeroRes();
+  G.income.energy+=5;G.income.food+=3;
+  G.pop.cap=6;G.workers.total=0;G.workers.used=0;
+  G.defense=0;G.hasComms=false;G.tradeCap=0;
+  G.hasStockpile=false;G.hasElevator=false;
+
+  // First pass: pop/workers/flags from habs and special buildings
+  for(const[key,tile] of Object.entries(G.tiles)){
+    if(!tile.building||tile.building==='road'||tile.building==='conveyor') continue;
+    const bd=BDEF[tile.building];if(!bd) continue;
+    const lv=bd.levels[tile.level];
+    if(lv.pop) G.pop.cap+=lv.pop;
+    if(lv.workerSlots) G.workers.total+=lv.workerSlots;
+    if(lv.globalStorage) G.hasStockpile=true;
+    if(tile.building==='comms'||tile.building==='elevator'){G.hasComms=true;G.tradeCap+=(lv.tradeCap||0);}
+    if(tile.building==='elevator') G.hasElevator=true;
+    if(lv.defense) G.defense+=lv.defense;
+  }
+  G.pop.cur=Math.min(G.pop.cur,G.pop.cap);
+  // Total workers = worker slots from habs
+  // Used workers = sum of workers from connected buildings + road throughput cost
+
+  const roads=getRoadSet(),convs=getConvSet();
+
+  // Road worker costs (throughput-based)
+  for(const rk of roads){
+    const[rq,rr]=rk.split(KS).map(Number);
+    G.workers.used+=roadWorkerCost(rq,rr);
+  }
+
+  // Build boost multipliers from repeatable research
+  G.repBoosts={};
+  for(const[id,count] of Object.entries(G.repeatCounts)){
+    if(!count) continue;
+    const tech=RTREE.find(t=>t.id===id);
+    if(!tech||!tech.baseBoost) continue;
+    for(const[bkey,pct] of Object.entries(tech.baseBoost)){
+      G.repBoosts[bkey]=(G.repBoosts[bkey]||0)+pct*count;
+    }
+  }
+
+  // Second pass: income
+  for(const[key,tile] of Object.entries(G.tiles)){
+    if(!tile.building||tile.building==='road'||tile.building==='conveyor') continue;
+    const bd=BDEF[tile.building];if(!bd) continue;
+    const lv=bd.levels[tile.level];
+    const[q,r]=key.split(KS).map(Number);
+    const terr=TERRAIN[tile.terrain];
+
+    // Worker demand: only if hab-connected
+    const connected=isHabConnected(key);
+    if(connected) G.workers.used+=(bd.workers||0);
+
+    // Road adjacency bonus
+    let roadBonus=0;
+    for(const nb of hexNbs(q,r)) if(roads.has(k(nb.q,nb.r))){roadBonus=0.12;break;}
+    const convBonus=convs.size*0.02;
+    // Repeat boost for this building type
+    const repBoost=G.repBoosts[tile.building]||0;
+    const mult=(1+roadBonus+convBonus+repBoost);
+
+    // Direct production
+    if(lv.prod) for(const[res,amt] of Object.entries(lv.prod)){
+      G.income[res]=(G.income[res]||0)+Math.round(amt*mult);
+    }
+
+    // Recipe buildings
+    const recType=tile.building==='matslab'?'matslab':tile.building==='furnace'?'furnace':tile.building==='factory'?'factory':tile.building==='reslab'?'reslab':null;
+    if(recType){
+      const recipes=recType==='matslab'?MATSLAB_RECIPES:recType==='furnace'?FURNACE_RECIPES:recType==='factory'?FACTORY_RECIPES:RESLAB_RECIPES;
+      const rid=(G.tileRecipes[key]||{})[recType];
+      const recipe=rid?recipes.find(r=>r.id===rid):null;
+      if(recipe){
+        for(const[res,amt] of Object.entries(recipe.output)) G.income[res]=(G.income[res]||0)+Math.round(amt*mult);
+        for(const[res,amt] of Object.entries(recipe.input)) G.income[res]=(G.income[res]||0)-amt;
+      }
+    }
+
+    // Terrain bonus (requires stockpile)
+    if(G.hasStockpile) for(const[res,amt] of Object.entries(terr.bonus||{})){
+      if(res in G.income) G.income[res]=(G.income[res]||0)+amt;
+    }
+  }
+
+  // AI passive
+  if(hasT('ai_core')) for(const sc of SCI_BASIC) G.income[sc]=(G.income[sc]||0)+1;
+  // Pop credit income
+  G.income.credits=(G.income.credits||0)+Math.floor(G.pop.cur*0.5);
+}
+
+// ════════════════════════════════════════════════════
+//  BUILD / UPGRADE / DEMOLISH
+// ════════════════════════════════════════════════════
+function canAfford(cost){return Object.entries(cost).every(([r,v])=>(G.res[r]||0)>=v);}
+function spend(cost){Object.entries(cost).forEach(([r,v])=>G.res[r]-=v);}
+
+function tryBuild(q,r){
+  const key=k(q,r),tile=G.tiles[key];
+  if(!tile||!TERRAIN[tile.terrain].passable){notify('Cannot build here','bad');return;}
+  if(tile.building){notify('Tile occupied','bad');return;}
+  const bkey=G.buildMode,bd=BDEF[bkey];
+  const lv=bd.levels[0];
+  if(lv.req&&!hasT(lv.req)){notify('Research required','warn');return;}
+  if(!canAfford(lv.cost)){notify('Not enough resources','bad');return;}
+  spend(lv.cost);
+  tile.building=bkey;tile.level=0;
+  addLog(`${bd.name} built [${q},${r}]`,'g');
+  notify(`${bd.icon} ${bd.name} built`);
+  recalcAll();renderAll();drawMap();
+}
+
+function upgradeTile(key){
+  const tile=G.tiles[key];if(!tile||!tile.building) return;
+  const bd=BDEF[tile.building];
+  const next=tile.level+1;
+  if(next>=bd.levels.length){notify('Max level','warn');return;}
+  const lv=bd.levels[next];
+  if(lv.req&&!hasT(lv.req)){notify(`Requires: ${lv.req}`,'warn');return;}
+  if(!canAfford(lv.cost)){notify('Not enough resources','bad');return;}
+  spend(lv.cost);tile.level=next;
+  addLog(`${bd.name} → Lv${next+1}`,'g');notify(`⬆ ${bd.name} Lv${next+1}`);
+  recalcAll();renderAll();drawMap();
+}
+
+function demolishTile(key){
+  const tile=G.tiles[key];if(!tile||!tile.building) return;
+  const bd=BDEF[tile.building];
+  G.res.iron=(G.res.iron||0)+8;
+  tile.building=null;tile.level=0;
+  delete G.tileRecipes[key];
+  addLog(`${bd.name} demolished`,'n');
+  recalcAll();renderAll();drawMap();
+}
+
+function setRecipe(key,type,id){
+  if(!G.tileRecipes[key]) G.tileRecipes[key]={};
+  G.tileRecipes[key][type]=id;
+  recalcAll();renderTileInfo();renderResPanel();
+}
+
+// ════════════════════════════════════════════════════
+//  END TURN
+// ════════════════════════════════════════════════════
+function endTurn(){
+  for(const[r,v] of Object.entries(G.income)){
+    G.res[r]=(G.res[r]||0)+v;
+    if(G.res[r]<0) G.res[r]=0;
+  }
+  // Worker shortfall penalty
+  if(G.workers.used>G.workers.total){
+    const sf=G.workers.used-G.workers.total;
+    const pen=1-Math.min(0.8,sf/(G.workers.used+1)*0.6);
+    for(const r of Object.keys(G.income)) if(G.income[r]>0) G.res[r]=Math.floor((G.res[r]||0)*pen);
+    addLog(`Worker shortage: ${sf}! Output penalized.`,'b');notify(`⚠ Worker shortage: ${sf}`,'warn');
+  }
+  // Food
+  const foodEat=Math.ceil(G.pop.cur*(hasT('life_support')?1.5:2));
+  if(G.res.food<foodEat){
+    G.pop.cur=Math.max(1,G.pop.cur-1);
+    addLog('Food shortage! Pop declined.','b');notify('⚠ Food shortage!','bad');
+  } else {
+    G.res.food-=foodEat;
+    if(G.pop.cur<G.pop.cap){G.pop.cur++;addLog(`Pop → ${G.pop.cur}`,'g');}
+  }
+  triggerEvent();
+  G.turn++;G.tradeDone=0;
+  recalcAll();renderAll();drawMap();
+  if(document.getElementById('research-page').classList.contains('active')) drawResearch();
+}
+
+function triggerEvent(){
+  if(Math.random()>0.28) return;
+  // Events no longer require comms
+  const evs=[
+    {w:3,msg:'Asteroid: iron deposits found!',t:'g',fn:()=>G.res.iron+=40},
+    {w:2,msg:'Copper vein discovered.',t:'g',fn:()=>G.res.copper+=30},
+    {w:3,msg:'Solar flare disrupts power grid.',t:'b',fn:()=>G.res.energy=Math.max(0,G.res.energy-35)},
+    {w:2,msg:'Trade convoy spotted in orbit.',t:'g',fn:()=>{G.res.credits+=80;G.res.iron+=20;},cond:()=>G.hasComms},
+    {w:2,msg:'Passing freighter offers supplies.',t:'g',fn:()=>{G.res.credits+=40;G.res.iron+=10;}},
+    {w:2,msg:'Ice storm: water reserves boosted.',t:'n',fn:()=>G.res.water+=20},
+    {w:2,msg:'Deep scan reveals mineral deposits.',t:'g',fn:()=>{G.res.iron+=25;G.res.copper+=15;}},
+    {w:2,msg:'Xenobiology samples recovered.',t:'g',fn:()=>{G.res.sci_red+=8;G.res.sci_green+=8;}},
+    {w:G.defense<4?3:1,msg:'Pirate raid! Iron stolen.',t:'b',fn:()=>{const l=Math.max(8,Math.floor((G.res.iron||0)*(G.defense<4?0.14:0.04)));G.res.iron=Math.max(0,G.res.iron-l);addLog(`Lost ${l} iron in raid.`,'b');}},
+    {w:1,msg:'Crystal resonance: science burst!',t:'g',fn:()=>{G.res.sci_yellow+=12;G.res.sci_purple=(G.res.sci_purple||0)+6;},cond:()=>Object.values(G.tiles).some(t=>t.terrain==='crystal')},
+    {w:1,msg:'Alien signal decoded from ruins!',t:'g',fn:()=>{G.res.sci_red+=10;G.res.sci_green+=10;G.res.sci_blue+=10;},cond:()=>Object.values(G.tiles).some(t=>t.terrain==='ruins')},
+    {w:2,msg:'Equipment malfunction. Resources lost.',t:'b',fn:()=>{G.res.iron=Math.max(0,(G.res.iron||0)-20);G.res.energy=Math.max(0,(G.res.energy||0)-15);}},
+  ];
+  const valid=evs.filter(e=>!e.cond||e.cond());
+  const tot=valid.reduce((a,e)=>a+e.w,0);
+  let rnd=Math.random()*tot;
+  for(const ev of valid){rnd-=ev.w;if(rnd<=0){ev.fn();addLog(ev.msg,ev.t);notify(ev.msg.slice(0,55),ev.t==='b'?'bad':ev.t==='n'?'warn':'');break;}}
+}
+
+// ════════════════════════════════════════════════════
+//  RESEARCH
+// ════════════════════════════════════════════════════
+function repCost(tech){
+  const count=(G.repeatCounts[tech.id]||0);
+  const base=tech.cost;
+  const mult=1+count*0.5; // each purchase 50% more expensive
+  const scaled={};
+  for(const[r,v] of Object.entries(base)) scaled[r]=Math.ceil(v*mult);
+  return scaled;
+}
+
+function doResearch(id){
+  const tech=RTREE.find(t=>t.id===id);
+  if(!tech) return;
+  if(!tech.repeat&&G.techs.has(id)) return;
+  if(tech.prereqs.some(p=>!hasT(p))){notify('Prerequisites not met','warn');return;}
+  const cost=tech.repeat?repCost(tech):tech.cost;
+  if(!canAfford(cost)){notify('Insufficient science','bad');return;}
+  spend(cost);
+  if(tech.repeat){
+    G.repeatCounts[id]=(G.repeatCounts[id]||0)+1;
+    addLog(`${tech.name} ×${G.repeatCounts[id]}`,'g');
+    notify(`⬆ ${tech.name} ×${G.repeatCounts[id]}`);
+  } else {
+    G.techs.add(id);
+    addLog(`Research: ${tech.name}`,'g');
+    notify(`🔬 ${tech.name}`);
+  }
+  recalcAll();renderAll();drawResearch();
+}
+
+// ════════════════════════════════════════════════════
+//  TRADE
+// ════════════════════════════════════════════════════
+function refreshTradeOffers(){
+  const avail=TRADE_CATALOG.filter(o=>o.minCap<=G.tradeCap);
+  const n=Math.min(avail.length,Math.max(3,G.tradeCap*2));
+  G.tradeOffers=[];const pool=[...avail];
+  while(G.tradeOffers.length<n&&pool.length){
+    const i=Math.floor(Math.random()*pool.length);
+    G.tradeOffers.push(pool.splice(i,1)[0]);
+  }
+}
+
+function doTrade(id){
+  if(!G.hasComms){notify('No comms array','bad');return;}
+  if(G.tradeDone>=G.tradeCap){notify('Trade capacity reached','warn');return;}
+  const offer=G.tradeOffers.find(o=>o.id===id)||TRADE_CATALOG.find(o=>o.id===id);
+  if(!offer) return;
+  if(!canAfford(offer.buy)){notify('Cannot afford trade','bad');return;}
+  spend(offer.buy);
+  for(const[r,v] of Object.entries(offer.give)) G.res[r]=(G.res[r]||0)+v;
+  G.tradeDone++;
+  addLog(`Trade: ${offer.name}`,'g');notify(`⇄ ${offer.name}`);
+  renderTradePanel();renderResPanel();
+}
+
+// ════════════════════════════════════════════════════
+//  MAP CANVAS
+// ════════════════════════════════════════════════════
+const mapEl=document.getElementById('map-area');
+const mc=document.getElementById('hex-canvas');
+const mctx=mc.getContext('2d');
+let camX=0,camY=0,mDrag=false,mDS=null,mDidDrag=false;
+
+function resizeMap(){
+  mc.width=mapEl.clientWidth;mc.height=mapEl.clientHeight;
+  const p=hexPx(Math.floor(MCOLS/2),Math.floor(MROWS/2));
+  camX=p.x-mc.width/2;camY=p.y-mc.height/2;
+  drawMap();
+}
+
+function drawMap(){
+  mctx.clearRect(0,0,mc.width,mc.height);
+  mctx.fillStyle='#010710';mctx.fillRect(0,0,mc.width,mc.height);
+  const roads=getRoadSet(),convs=getConvSet();
+
+  for(let r=0;r<MROWS;r++) for(let q=0;q<MCOLS;q++){
+    const key=k(q,r),tile=G.tiles[key];if(!tile) continue;
+    const p=hexPx(q,r),sx=p.x-camX,sy=p.y-camY;
+    if(sx<-HSZ*2||sx>mc.width+HSZ*2||sy<-HSZ*2||sy>mc.height+HSZ*2) continue;
+    const terr=TERRAIN[tile.terrain],sel=G.selectedKey===key;
+    const pts=hexPts(sx,sy,HSZ-1);
+
+    mctx.beginPath();mctx.moveTo(pts[0][0],pts[0][1]);
+    for(let i=1;i<6;i++) mctx.lineTo(pts[i][0],pts[i][1]);mctx.closePath();
+    mctx.fillStyle=terr.fill;mctx.fill();
+    mctx.strokeStyle=sel?'#ff6b35':terr.stroke;mctx.lineWidth=sel?2:1;mctx.stroke();
+
+    if(tile.building==='road'||tile.building==='conveyor'){
+      const isC=tile.building==='conveyor';
+      mctx.save();mctx.strokeStyle=isC?'#007755':'#1a5070';
+      mctx.lineWidth=isC?3:2;mctx.setLineDash(isC?[5,3]:[3,5]);
+      for(const nb of hexNbs(q,r)){
+        const nk=k(nb.q,nb.r);
+        if(roads.has(nk)||convs.has(nk)||G.tiles[nk]?.building){
+          const np=hexPx(nb.q,nb.r),nx=np.x-camX,ny=np.y-camY;
+          mctx.beginPath();mctx.moveTo(sx,sy);mctx.lineTo((sx+nx)/2,(sy+ny)/2);mctx.stroke();
+        }
+      }
+      mctx.setLineDash([]);mctx.restore();
+      mctx.font='11px serif';mctx.textAlign='center';mctx.textBaseline='middle';
+      mctx.globalAlpha=0.8;mctx.fillStyle=isC?'#00ffaa':'#4080a0';
+      mctx.fillText(isC?'⇒':'━',sx,sy);mctx.globalAlpha=1;
+    } else if(tile.building){
+      const bd=BDEF[tile.building];if(!bd) continue;
+      mctx.save();mctx.shadowColor=getBColor(tile.building);mctx.shadowBlur=10;
+      mctx.font=`${HSZ*0.56}px serif`;mctx.textAlign='center';mctx.textBaseline='middle';
+      mctx.fillText(bd.icon,sx,sy-1);mctx.restore();
+      if(tile.level>0){
+        for(let l=0;l<=tile.level;l++){
+          mctx.beginPath();mctx.arc(sx-(tile.level*4)+(l*8),sy+HSZ*0.52,2.2,0,Math.PI*2);
+          mctx.fillStyle='#ffd700';mctx.fill();
+        }
+      }
+    }
+    if(sel){
+      mctx.save();mctx.beginPath();mctx.moveTo(pts[0][0],pts[0][1]);
+      for(let i=1;i<6;i++) mctx.lineTo(pts[i][0],pts[i][1]);mctx.closePath();
+      mctx.strokeStyle='#ff6b35';mctx.lineWidth=2.5;mctx.shadowColor='#ff6b35';mctx.shadowBlur=14;mctx.stroke();mctx.restore();
+    }
+    if(G.buildMode&&!tile.building&&terr.passable){
+      mctx.save();mctx.beginPath();mctx.moveTo(pts[0][0],pts[0][1]);
+      for(let i=1;i<6;i++) mctx.lineTo(pts[i][0],pts[i][1]);mctx.closePath();
+      mctx.fillStyle='rgba(0,212,255,.07)';mctx.fill();mctx.restore();
+    }
+  }
+}
+
+function getBColor(b){
+  return {mine:'#b87333',solar:'#ffd700',farm:'#39ff14',pump:'#4ae4ff',matslab:'#88ff44',furnace:'#ff6600',factory:'#8899aa',hab:'#00d4ff',reslab:'#b44fff',refinery:'#7ec0dd',turret:'#ff2244',stockpile:'#ffd700',comms:'#00d4ff',elevator:'#ff6b35',extractor:'#8800ff'}[b]||'#00d4ff';
+}
+
+mapEl.addEventListener('mousedown',e=>{mDrag=true;mDidDrag=false;mDS={x:e.clientX,y:e.clientY,cx:camX,cy:camY};mapEl.classList.add('grabbing');});
+mapEl.addEventListener('mousemove',e=>{if(!mDrag) return;const dx=e.clientX-mDS.x,dy=e.clientY-mDS.y;if(Math.abs(dx)>3||Math.abs(dy)>3) mDidDrag=true;camX=mDS.cx-dx;camY=mDS.cy-dy;drawMap();});
+mapEl.addEventListener('mouseup',e=>{mapEl.classList.remove('grabbing');if(!mDidDrag) handleMapClick(e);mDrag=false;});
+mapEl.addEventListener('mouseleave',()=>{mDrag=false;mapEl.classList.remove('grabbing');});
+
+function handleMapClick(e){
+  const rect=mapEl.getBoundingClientRect();
+  const{q,r}=pxHex(e.clientX-rect.left+camX,e.clientY-rect.top+camY);
+  if(q<0||q>=MCOLS||r<0||r>=MROWS) return;
+  const key=k(q,r);if(!G.tiles[key]) return;
+  if(G.buildMode){tryBuild(q,r);}
+  else{G.selectedKey=(G.selectedKey===key)?null:key;setSB('tile');renderTileInfo();drawMap();}
+}
+
+// ════════════════════════════════════════════════════
+//  RESEARCH CANVAS (pannable)
+// ════════════════════════════════════════════════════
+const rcWrap=document.getElementById('rcanvas-wrap');
+const rc=document.getElementById('rcanvas');
+const rctx=rc.getContext('2d');
+let rCamX=0,rCamY=-30,rDrag=false,rDS=null,rDidDrag=false;
+const NR=25,TCOL=140,TROW=112,TOFX=70,TOFY=60;
+let rNodes=[];
+
+function buildResNodes(){
+  rNodes=RTREE.map(t=>({...t,x:TOFX+t.pos[0]*TCOL,y:TOFY+t.pos[1]*TROW}));
+}
+
+function drawResearch(){
+  rc.width=rcWrap.clientWidth||900;rc.height=rcWrap.clientHeight||600;
+  rctx.clearRect(0,0,rc.width,rc.height);
+  rctx.fillStyle='#010a12';rctx.fillRect(0,0,rc.width,rc.height);
+  rctx.fillStyle='rgba(10,58,92,.2)';
+  for(let x=0;x<rc.width;x+=25) for(let y=0;y<rc.height;y+=25){rctx.beginPath();rctx.arc(x,y,1,0,Math.PI*2);rctx.fill();}
+
+  const ox=rc.width/2-rCamX,oy=rc.height/2-rCamY;
+
+  // Edges
+  for(const node of rNodes){
+    for(const pid of node.prereqs){
+      const par=rNodes.find(n=>n.id===pid);if(!par) continue;
+      const done=hasT(node.id)||(node.repeat&&(G.repeatCounts[node.id]||0)>0);
+      const pdone=hasT(pid)||(par.repeat&&(G.repeatCounts[pid]||0)>0);
+      rctx.save();
+      rctx.strokeStyle=done&&pdone?'rgba(57,255,20,.3)':pdone?'rgba(0,212,255,.22)':'rgba(15,45,70,.45)';
+      rctx.lineWidth=1.5;if(!pdone) rctx.setLineDash([4,7]);
+      rctx.beginPath();rctx.moveTo(par.x+ox,par.y+oy);rctx.lineTo(node.x+ox,node.y+oy);rctx.stroke();
+      rctx.setLineDash([]);rctx.restore();
+    }
+  }
+
+  // Nodes
+  for(const node of rNodes){
+    const count=G.repeatCounts[node.id]||0;
+    const done=node.repeat?count>0:hasT(node.id);
+    const pMet=node.prereqs.every(p=>hasT(p)||(G.repeatCounts[p]||0)>0);
+    const cost=node.repeat?repCost(node):node.cost;
+    const afford=canAfford(cost);
+    const nx=node.x+ox,ny=node.y+oy;
+    const pts=hexPts(nx,ny,NR);
+
+    rctx.beginPath();rctx.moveTo(pts[0][0],pts[0][1]);
+    for(let i=1;i<6;i++) rctx.lineTo(pts[i][0],pts[i][1]);rctx.closePath();
+
+    // Node color based on science cost type
+    let nodeCol='rgba(0,100,180,.14)';
+    if(done&&!node.repeat) nodeCol='rgba(57,255,20,.12)';
+    else if(!pMet) nodeCol='rgba(3,10,18,.95)';
+    rctx.fillStyle=nodeCol;rctx.fill();
+
+    // Stroke — color hint from first cost key
+    const firstCostKey=Object.keys(node.cost||{})[0];
+    const sciCol=SCI_COLORS[firstCostKey];
+    rctx.save();
+    rctx.strokeStyle=done&&!node.repeat?'#39ff14':sciCol&&pMet?sciCol.color:pMet?'#00d4ff':'#0a3a5c';
+    rctx.lineWidth=done&&!node.repeat?2:pMet?1.5:1;
+    if(done&&!node.repeat){rctx.shadowColor='#39ff14';rctx.shadowBlur=10;}
+    else if(pMet&&afford){rctx.shadowColor=sciCol?sciCol.color:'#00d4ff';rctx.shadowBlur=6;}
+    rctx.stroke();rctx.restore();
+
+    // Icon
+    rctx.font=`${NR*0.65}px serif`;rctx.textAlign='center';rctx.textBaseline='middle';
+    rctx.globalAlpha=done||pMet?1:0.25;
+    rctx.fillText(node.icon,nx,ny-3);rctx.globalAlpha=1;
+
+    // Status label
+    if(done&&!node.repeat){
+      rctx.font="9px serif";rctx.fillStyle='#39ff14';rctx.textAlign='center';
+      rctx.fillText('✓',nx,ny+9);
+    } else if(node.repeat&&count>0){
+      rctx.font="8px 'Share Tech Mono'";rctx.fillStyle='#ffd700';rctx.textAlign='center';
+      rctx.fillText(`×${count}`,nx,ny+9);
+    } else {
+      // Science cost dots
+      const costKeys=Object.keys(node.cost);
+      const dotR=3,spacing=7;
+      const startX=nx-(costKeys.length-1)*spacing/2;
+      costKeys.forEach((ck,i)=>{
+        const sc=SCI_COLORS[ck];
+        rctx.beginPath();rctx.arc(startX+i*spacing,ny+9,dotR,0,Math.PI*2);
+        rctx.fillStyle=sc?sc.color:'#888';
+        rctx.globalAlpha=pMet?1:0.3;
+        rctx.fill();rctx.globalAlpha=1;
+      });
+    }
+
+    // Name
+    const words=(node.repeat?'∞ ':'')+(node.name.replace('[∞] ','')).split(' ');
+    rctx.font="7px 'Share Tech Mono'";rctx.textAlign='center';
+    rctx.fillStyle=done&&!node.repeat?'#39ff14':pMet?'#7ec0dd':'#2a5a7a';
+    const nameStr=Array.isArray(words)?words.join(' '):words;
+    const wds=nameStr.split(' ');
+    rctx.fillText(wds.slice(0,2).join(' '),nx,ny+NR+10);
+    if(wds.length>2) rctx.fillText(wds.slice(2).join(' '),nx,ny+NR+19);
+  }
+}
+
+// Research tooltip
+const ttbox=document.getElementById('ttbox');
+rcWrap.addEventListener('mousemove',e=>{
+  if(rDidDrag){ttbox.classList.remove('show');return;}
+  const rect=rcWrap.getBoundingClientRect();
+  const ox=rc.width/2-rCamX,oy=rc.height/2-rCamY;
+  const mx=e.clientX-rect.left,my=e.clientY-rect.top;
+  let found=null;
+  for(const n of rNodes){const d=Math.sqrt((mx-(n.x+ox))**2+(my-(n.y+oy))**2);if(d<NR+6){found=n;break;}}
+  if(found){
+    const count=G.repeatCounts[found.id]||0;
+    const done=found.repeat?count>0:hasT(found.id);
+    const pMet=found.prereqs.every(p=>hasT(p)||(G.repeatCounts[p]||0)>0);
+    const cost=found.repeat?repCost(found):found.cost;
+    document.getElementById('tt-name').textContent=found.name+(found.repeat?` (×${count} purchased)`:'');
+    document.getElementById('tt-desc').textContent=found.desc;
+    const costStr=Object.entries(cost).map(([r,v])=>`${v} ${SCI_COLORS[r]?SCI_COLORS[r].label:r}`).join(', ');
+    document.getElementById('tt-cost').textContent=`Cost: ${costStr} · ${found.effect}`;
+    const locked=found.prereqs.filter(p=>!hasT(p)&&!(G.repeatCounts[p]||0)).map(p=>RTREE.find(t=>t.id===p)?.name||p);
+    const st=done&&!found.repeat?'✓ RESEARCHED':found.repeat?`Available (×${count} done)`:pMet?'Available':`🔒 Needs: ${locked.join(', ')}`;
+    document.getElementById('tt-status').textContent=st;
+    document.getElementById('tt-status').style.color=done&&!found.repeat?'#39ff14':pMet?'#00d4ff':'#ff2244';
+    ttbox.style.left=(e.clientX+14)+'px';ttbox.style.top=(e.clientY-8)+'px';
+    ttbox.classList.add('show');
+  } else ttbox.classList.remove('show');
+});
+rcWrap.addEventListener('mouseleave',()=>ttbox.classList.remove('show'));
+rcWrap.addEventListener('click',e=>{
+  if(rDidDrag) return;
+  const rect=rcWrap.getBoundingClientRect();
+  const ox=rc.width/2-rCamX,oy=rc.height/2-rCamY;
+  const mx=e.clientX-rect.left,my=e.clientY-rect.top;
+  for(const n of rNodes){const d=Math.sqrt((mx-(n.x+ox))**2+(my-(n.y+oy))**2);if(d<NR+6){doResearch(n.id);break;}}
+});
+rcWrap.addEventListener('mousedown',e=>{rDrag=true;rDidDrag=false;rDS={x:e.clientX,y:e.clientY,cx:rCamX,cy:rCamY};rcWrap.classList.add('grabbing');});
+rcWrap.addEventListener('mousemove',e=>{if(!rDrag) return;const dx=e.clientX-rDS.x,dy=e.clientY-rDS.y;if(Math.abs(dx)>3||Math.abs(dy)>3) rDidDrag=true;rCamX=rDS.cx-dx;rCamY=rDS.cy-dy;drawResearch();});
+rcWrap.addEventListener('mouseup',()=>{rDrag=false;rcWrap.classList.remove('grabbing');setTimeout(()=>rDidDrag=false,50);});
+rcWrap.addEventListener('mouseleave',()=>{rDrag=false;rcWrap.classList.remove('grabbing');});
+
+// ════════════════════════════════════════════════════
+//  RENDER UI
+// ════════════════════════════════════════════════════
+function renderAll(){
+  renderTopbar();renderBuildPanel();renderResPanel();renderTileInfo();renderLog();
+  renderSciDisplay();renderTopbarBtns();
+}
+
+function renderTopbar(){
+  document.getElementById('cyc-n').textContent=String(G.turn).padStart(3,'0');
+  document.getElementById('pop-v').textContent=`${G.pop.cur}/${G.pop.cap}`;
+  const wv=document.getElementById('wrk-v');
+  wv.textContent=`${G.workers.used}/${G.workers.total}`;
+  wv.className='cv'+(G.workers.used>G.workers.total?' warn':'');
+}
+
+function renderTopbarBtns(){
+  const tb=document.getElementById('tbtn-trade');
+  tb.classList.toggle('locked',!G.hasComms);
+}
+
+function renderSciDisplay(){
+  const el=document.getElementById('rp-sci-display');
+  if(!el) return;
+  const parts=SCI_ALL.filter(s=>(G.res[s]||0)>0||(G.income[s]||0)>0).map(s=>{
+    const sc=SCI_COLORS[s];const v=Math.floor(G.res[s]||0);const d=Math.round(G.income[s]||0);
+    return `<span style="color:${sc.color};margin-right:8px;">${sc.icon}${v}${d>0?`<span style="font-size:.52rem;color:${sc.color}88"> +${d}</span>`:''}</span>`;
+  }).join('');
+  el.innerHTML=parts||'<span style="color:var(--dim);font-size:.56rem;">Build a Materials Lab to generate science</span>';
+}
+
+function renderBuildPanel(){
+  let html='';
+  for(const[gkey,glabel] of Object.entries(BUILD_GROUPS)){
+    const items=Object.entries(BDEF).filter(([bk])=>b_group_match(bk,gkey));
+    if(!items.length) continue;
+    html+=`<div class="glbl">${glabel}</div>`;
+    for(const[bkey,bd] of items){
+      const lv=bd.levels[0];
+      const affordable=canAfford(lv.cost);
+      const isMode=G.buildMode===bkey;
+      const costStr=Object.entries(lv.cost).map(([r,v])=>`${v}${(RES_DEF[r]?.label||r).split(' ')[0]}`).join(' ');
+      html+=`<button class="bbtn ${isMode?'am':''}" onclick="setBuild('${bkey}')" ${!affordable&&!isMode?'disabled':''}>
+        <span class="bic">${bd.icon}</span><span class="bnm">${bd.name}</span><span class="bcs">${costStr}</span>
+      </button>`;
+    }
+  }
+  html+=`<div class="glbl">MODE</div>
+    <button class="bbtn ${G.buildMode===null?'am':''}" onclick="setBuild(null)">
+      <span class="bic">🔍</span><span class="bnm">Inspect</span>
+    </button>`;
+  document.getElementById('sbp-build').innerHTML=html;
+}
+
+function renderResPanel(){
+  const sections=[
+    {label:'ORES',        keys:['iron','copper','coal','silicon','titanium','rareearth']},
+    {label:'ENERGY & FOOD',keys:['energy','food','water']},
+    {label:'PROCESSED',   keys:['steel','copper_w','circuit','alloy','polymer','nanomat','darkmat']},
+    {label:'SCIENCE',     keys:SCI_ALL},
+    {label:'ECONOMY',     keys:['credits']},
+  ];
+  let html='';
+  for(const sec of sections){
+    const vis=sec.keys.filter(r=>resVisible(r));
+    if(!vis.length) continue;
+    html+=`<div class="rs-lbl">${sec.label}</div>`;
+    for(const rkey of vis){
+      const rd=RES_DEF[rkey];
+      const val=Math.floor(G.res[rkey]||0);
+      const delta=Math.round(G.income[rkey]||0);
+      const dc=delta>0?'p':delta<0?'n':'z';
+      const ds=delta>0?'+':'';
+      const pct=Math.min(100,(val/Math.max(1,val+80))*100);
+      const isSci=SCI_ALL.includes(rkey);
+      html+=`<div class="rrow" style="border-left:2px solid ${rd.color}44;">
+        ${isSci?`<div class="sci-dot" style="background:${rd.color};margin-right:4px;"></div>`:`<span class="ri">${rd.icon}</span>`}
+        <span class="rl">${rd.label}</span>
+        <span class="rv" style="color:${rd.color}">${val}</span>
+        <span class="rd ${dc}">${ds}${delta}</span>
+        <div class="rbar"><div class="rbf" style="width:${pct}%;background:${rd.color}77;"></div></div>
+      </div>`;
+    }
+  }
+  if(!G.hasStockpile) html+=`<div class="note">Build a Stockpile to reveal advanced resources</div>`;
+  document.getElementById('sbp-res').innerHTML=html;
+}
+
+function renderTileInfo(){
+  const el=document.getElementById('tile-info');
+  if(!G.selectedKey){el.innerHTML='<div style="font-size:.62rem;color:var(--dim);padding:9px;">Click a tile</div>';return;}
+  const tile=G.tiles[G.selectedKey];if(!tile) return;
+  const[q,r]=G.selectedKey.split(KS).map(Number);
+  const terr=TERRAIN[tile.terrain];
+  let html=`<div class="ti-name">${terr.label}</div><div class="ti-sub">[${q}, ${r}]</div>`;
+  const bonusEntries=Object.entries(terr.bonus||{});
+  if(bonusEntries.length) html+=`<div class="ti-row"><span class="tk">TERRAIN</span><span class="tv">${bonusEntries.map(([r,v])=>`+${v} ${r}`).join(', ')}</span></div>`;
+
+  if(tile.building==='road'){
+    const[rq2,rr2]=[q,r];
+    const flow=roadThroughput(rq2,rr2);
+    const wCost=roadWorkerCost(rq2,rr2);
+    html+=`<div style="margin:6px 0 3px;font-size:.66rem;color:var(--acc);">━ Road</div>`;
+    html+=`<div class="ti-row"><span class="tk">THROUGHPUT</span><span class="tv">${flow} units est.</span></div>`;
+    html+=`<div class="ti-row"><span class="tk">WORKERS</span><span class="tv">${wCost} (dynamic)</span></div>`;
+    html+=`<div class="ti-row"><span class="tk">BONUS</span><span class="tv">+12% adj. output</span></div>`;
+    html+=`<button class="act-btn red" onclick="demolishTile('${G.selectedKey}')">🗑 REMOVE</button>`;
+  } else if(tile.building==='conveyor'){
+    const lv=BDEF.conveyor.levels[tile.level];
+    html+=`<div style="margin:6px 0 3px;font-size:.66rem;color:var(--teal);">⇒ Conveyor Lv${tile.level+1}</div>`;
+    html+=`<div class="ti-row"><span class="tk">CAPACITY</span><span class="tv">${lv.cap}/cycle</span></div>`;
+    html+=`<div class="ti-row"><span class="tk">WORKERS</span><span class="tv">0 (automated)</span></div>`;
+    const next=tile.level+1;
+    if(next<BDEF.conveyor.levels.length){
+      const nxt=BDEF.conveyor.levels[next];
+      const cs=Object.entries(nxt.cost).map(([r,v])=>`${v} ${r}`).join(', ');
+      const rm=!nxt.req||hasT(nxt.req);
+      html+=`<button class="act-btn" onclick="upgradeTile('${G.selectedKey}')" ${!canAfford(nxt.cost)||!rm?'disabled':''}>⬆ UPGRADE [${cs}]${nxt.req&&!rm?' 🔒':''}</button>`;
+    }
+    html+=`<button class="act-btn red" onclick="demolishTile('${G.selectedKey}')">🗑 REMOVE</button>`;
+  } else if(tile.building){
+    const bd=BDEF[tile.building];if(!bd){el.innerHTML=html;return;}
+    const lv=bd.levels[tile.level];
+    const connected=isHabConnected(G.selectedKey);
+    html+=`<div style="margin:6px 0 3px;font-size:.66rem;color:var(--acc);">${bd.icon} ${bd.name} Lv${tile.level+1}</div>`;
+    html+=`<div class="ti-row"><span class="tk">INFO</span><span class="tv">${lv.desc}</span></div>`;
+    html+=`<div class="ti-row"><span class="tk">WORKERS</span><span class="tv">${bd.workers} ${connected?'✓':'⚠ no road to hab'}</span></div>`;
+
+    // Recipe selectors
+    const recType=tile.building==='matslab'?'matslab':tile.building==='furnace'?'furnace':tile.building==='factory'?'factory':tile.building==='reslab'?'reslab':null;
+    if(recType){
+      const recipes=recType==='matslab'?MATSLAB_RECIPES:recType==='furnace'?FURNACE_RECIPES:recType==='factory'?FACTORY_RECIPES:RESLAB_RECIPES;
+      const curRec=(G.tileRecipes[G.selectedKey]||{})[recType];
+      html+=`<div style="font-size:.56rem;color:var(--dim);letter-spacing:2px;padding:5px 0 2px;">SELECT RECIPE</div>`;
+      for(const rec of recipes){
+        if(rec.unlock&&!hasT(rec.unlock)) continue;
+        const isA=curRec===rec.id;
+        const inStr=Object.entries(rec.input).map(([r,v])=>`${v} ${(RES_DEF[r]?.label||r).split(' ')[0]}`).join('+');
+        const outStr=Object.entries(rec.output).map(([r,v])=>{
+          const rd=RES_DEF[r];
+          const col=rd?.color||'#888';
+          return `<span style="color:${col}">${v} ${(rd?.label||r).split(' ')[0]}</span>`;
+        }).join('+');
+        html+=`<div class="recipe-item ${isA?'ar':''}" onclick="setRecipe('${G.selectedKey}','${recType}','${rec.id}')">
+          <span class="rn">${rec.name}</span>
+          <span class="rio">${inStr?inStr+' → ':''}</span>${outStr}
+        </div>`;
+      }
+    }
+
+    const next=tile.level+1;
+    if(next<bd.levels.length){
+      const nxt=bd.levels[next];
+      const cs=Object.entries(nxt.cost).map(([r,v])=>`${v} ${r}`).join(', ');
+      const rm=!nxt.req||hasT(nxt.req);
+      const aff=canAfford(nxt.cost);
+      html+=`<button class="act-btn" onclick="upgradeTile('${G.selectedKey}')" ${!aff||!rm?'disabled':''}>⬆ UPGRADE${nxt.req&&!rm?' 🔒':''} [${cs}]</button>`;
+    } else html+=`<div style="font-size:.58rem;color:var(--yellow);padding:3px 0;">★ MAX LEVEL</div>`;
+    html+=`<button class="act-btn red" onclick="demolishTile('${G.selectedKey}')">🗑 DEMOLISH</button>`;
+  } else {
+    html+=`<div style="font-size:.6rem;color:var(--dim);padding:5px 0;">Empty — select build mode.</div>`;
+  }
+  el.innerHTML=html;
+}
+
+function renderTradePanel(){
+  if(!G.hasComms){
+    document.getElementById('trade-grid').innerHTML=`<div style="grid-column:span 2;font-size:.68rem;color:var(--dim);padding:18px;">Build a Comms Array to unlock the Trade Hub.</div>`;
+    return;
+  }
+  if(!G.tradeOffers.length) refreshTradeOffers();
+  const cap=G.tradeCap;
+  document.getElementById('trade-cap-info').textContent=`${G.tradeDone}/${cap} trades · Comms: ${countB('comms')} · Elevator: ${G.hasElevator?'YES':'NO'}`;
+  let html=`<div class="tcard" style="grid-column:span 2;">
+    <div class="tcard-title">MARKET OFFERS</div>
+    <div style="font-size:.56rem;color:var(--dim);padding:3px 0 5px;">Capacity: ${cap}/cycle. ${cap===0?'<span style="color:var(--red)">Build Comms Arrays to increase capacity.</span>':''}</div>`;
+  for(const offer of G.tradeOffers){
+    const ok=canAfford(offer.buy)&&G.tradeDone<cap;
+    const bs=Object.entries(offer.buy).map(([r,v])=>`${v} ${(RES_DEF[r]?.label||r).split(' ')[0]}`).join(', ');
+    const gs=Object.entries(offer.give).map(([r,v])=>`${v} ${(RES_DEF[r]?.label||r).split(' ')[0]}`).join(', ');
+    html+=`<div class="tr-row"><span>${offer.name}</span><span style="font-size:.58rem;color:var(--dim)">${bs} → ${gs}</span><button class="tbtn2" onclick="doTrade('${offer.id}')" ${ok?'':'disabled'}>TRADE</button></div>`;
+  }
+  html+=`</div><div class="tcard"><div class="tcard-title">CAPACITY SOURCES</div>`;
+  const capBuildings=Object.entries(G.tiles).filter(([,t])=>t.building==='comms'||t.building==='elevator');
+  if(capBuildings.length){
+    for(const[,t] of capBuildings){const bd=BDEF[t.building];const lv=bd.levels[t.level];html+=`<div class="tr-row"><span>${bd.icon} ${bd.name} Lv${t.level+1}</span><span style="color:var(--acc)">+${lv.tradeCap||0} cap</span></div>`;}
+  } else html+=`<div style="font-size:.6rem;color:var(--dim)">No comms buildings</div>`;
+  html+=`</div><div class="tcard"><div class="tcard-title">HOW TO EXPAND TRADE</div>
+    <div style="font-size:.6rem;color:var(--text2);line-height:1.6;">Each Comms Array adds +2 capacity (Lv2: +5). Research <b>Deep Space Comms</b> to upgrade. Build a <b>Space Elevator</b> (requires Nanotechnology + Deep Space Comms research) for +20 trade capacity. Research <b>Trade Expansion</b> to unlock Refinery Lv2.</div>
+  </div>`;
+  document.getElementById('trade-grid').innerHTML=html;
+}
+
+function countB(bkey){return Object.values(G.tiles).filter(t=>t.building===bkey).length;}
+function renderLog(){document.getElementById('event-log').innerHTML=[...G.log].reverse().slice(0,10).map(e=>`<div class="li"><span class="lt">[${String(e.t).padStart(3,'0')}]</span><span class="l${e.type}">${e.msg}</span></div>`).join('');}
+
+// ════════════════════════════════════════════════════
+//  PAGE / TAB NAV
+// ════════════════════════════════════════════════════
+function setPage(id){
+  if(id==='trade'&&!G.hasComms) return;
+  document.getElementById('map-area').style.display=id==='map'?'':'none';
+  document.getElementById('research-page').classList.toggle('active',id==='research');
+  document.getElementById('trade-page').classList.toggle('active',id==='trade');
+  ['map','research','trade'].forEach(p=>document.getElementById(`tbtn-${p}`).classList.toggle('active',p===id));
+  if(id==='research') setTimeout(()=>{rc.width=rcWrap.clientWidth;rc.height=rcWrap.clientHeight;renderSciDisplay();drawResearch();},30);
+  if(id==='trade') renderTradePanel();
+}
+
+function setSB(id){
+  ['build','res','tile','log'].forEach(t=>{
+    document.getElementById(`sbt-${t}`).classList.toggle('active',t===id);
+    document.getElementById(`sbp-${t}`).classList.toggle('active',t===id);
+  });
+  if(id==='tile') renderTileInfo();
+}
+
+function setBuild(bkey){
+  G.buildMode=(G.buildMode===bkey)?null:bkey;
+  const mi=document.getElementById('mode-ind');
+  if(G.buildMode){mi.textContent=`BUILD: ${BDEF[G.buildMode].name}`;mi.classList.add('on');}
+  else{mi.textContent='INSPECT';mi.classList.remove('on');}
+  renderBuildPanel();
+}
+
+function addLog(msg,type='n'){G.log.push({t:G.turn,msg,type});renderLog();}
+function notify(msg,type=''){
+  const c=document.getElementById('nwrap');
+  const n=document.createElement('div');
+  n.className='notif'+(type?` ${type}`:'');n.textContent=msg;
+  c.appendChild(n);setTimeout(()=>n.remove(),3100);
+}
+
+function initStars(){
+  const el=document.getElementById('stars');
+  for(let i=0;i<80;i++){
+    const s=document.createElement('div');s.className='star';
+    const sz=Math.random()*1.4+0.3;
+    s.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--d:${2+Math.random()*5}s;--lo:${0.04+Math.random()*0.18};animation-delay:${Math.random()*6}s;`;
+    el.appendChild(s);
+  }
+}
+
+// ════════════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════════════
+initStars();
+genMap();
+buildResNodes();
+window.addEventListener('resize',()=>{
+  resizeMap();
+  if(document.getElementById('research-page').classList.contains('active')) drawResearch();
+});
+resizeMap();
+renderAll();
+</script>
+</body>
+</html>
