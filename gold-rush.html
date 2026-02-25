@@ -1,0 +1,2186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GOLD RUSH! The Cold-Calling Game</title>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold: #FFD700;
+  --gold-dark: #B8860B;
+  --gold-light: #FFF176;
+  --ink: #1a0a00;
+  --red: #FF3B30;
+  --green: #34C759;
+  --blue: #007AFF;
+  --orange: #FF9500;
+  --cream: #FFF8E7;
+  --panel-bg: #FFFDE0;
+  --outline: 3px solid #1a0a00;
+  --shadow: 4px 4px 0px #1a0a00;
+  --shadow-lg: 6px 6px 0px #1a0a00;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #FFD700;
+  background-image:
+    radial-gradient(circle, #B8860B 1px, transparent 1px);
+  background-size: 20px 20px;
+  font-family: 'Nunito', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* HEADER */
+#header {
+  background: var(--ink);
+  border-bottom: 4px solid var(--gold);
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+#logo {
+  font-family: 'Bangers', cursive;
+  font-size: 2.4rem;
+  color: var(--gold);
+  letter-spacing: 3px;
+  text-shadow: 3px 3px 0 #8B6914, -1px -1px 0 #8B6914;
+  line-height: 1;
+}
+
+#logo span { color: #FF9500; }
+
+.stat-pills {
+  display: flex; gap: 10px; align-items: center;
+}
+
+.stat-pill {
+  background: var(--gold);
+  border: 3px solid var(--ink);
+  border-radius: 20px;
+  padding: 4px 14px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.1rem;
+  color: var(--ink);
+  box-shadow: 3px 3px 0 rgba(0,0,0,0.4);
+  display: flex; align-items: center; gap: 5px;
+}
+
+.stat-pill.green { background: var(--green); color: white; }
+.stat-pill.red { background: var(--red); color: white; }
+
+/* MAIN LAYOUT */
+#main {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 16px;
+  padding: 16px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* PANELS */
+.panel {
+  background: var(--panel-bg);
+  border: var(--outline);
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+
+.panel-header {
+  background: var(--ink);
+  color: var(--gold);
+  font-family: 'Bangers', cursive;
+  font-size: 1.3rem;
+  letter-spacing: 2px;
+  padding: 8px 16px;
+  display: flex; align-items: center; gap: 8px;
+}
+
+.panel-body { padding: 16px; }
+
+/* PHONE DISPLAY */
+#phone-screen {
+  background: linear-gradient(135deg, #2d2d2d, #1a1a1a);
+  border: 4px solid var(--ink);
+  border-radius: 20px;
+  box-shadow: var(--shadow-lg), inset 0 2px 10px rgba(255,255,255,0.1);
+  padding: 20px;
+  text-align: center;
+  margin-bottom: 16px;
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+#phone-screen::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(255,255,255,0.02) 2px,
+    rgba(255,255,255,0.02) 4px
+  );
+  pointer-events: none;
+}
+
+#phone-number {
+  font-family: 'Bangers', cursive;
+  font-size: 2.5rem;
+  letter-spacing: 6px;
+  color: #00FF00;
+  text-shadow: 0 0 20px #00FF00, 0 0 40px #00AA00;
+  transition: all 0.3s;
+}
+
+#phone-status {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1rem;
+  margin-top: 8px;
+}
+
+#call-btn {
+  background: linear-gradient(135deg, var(--green), #28a745);
+  border: 4px solid var(--ink);
+  border-radius: 50px;
+  padding: 16px 48px;
+  font-family: 'Bangers', cursive;
+  font-size: 1.8rem;
+  letter-spacing: 3px;
+  color: white;
+  cursor: pointer;
+  box-shadow: var(--shadow-lg);
+  transition: all 0.1s;
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.3);
+  width: 100%;
+  margin-top: 12px;
+}
+
+#call-btn:hover { transform: translate(-2px,-2px); box-shadow: 8px 8px 0 var(--ink); }
+#call-btn:active { transform: translate(2px,2px); box-shadow: 2px 2px 0 var(--ink); }
+#call-btn:disabled { background: #999; cursor: not-allowed; transform: none; box-shadow: var(--shadow); }
+
+/* CALLER CARD */
+#caller-area { display: none; }
+
+.caller-bubble {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.caller-avatar {
+  width: 80px;
+  height: 80px;
+  border: 4px solid var(--ink);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  flex-shrink: 0;
+  box-shadow: var(--shadow);
+  background: white;
+  animation: wobble 3s ease-in-out infinite;
+}
+
+@keyframes wobble {
+  0%,100% { transform: rotate(-3deg); }
+  50% { transform: rotate(3deg); }
+}
+
+.speech-bubble {
+  background: white;
+  border: var(--outline);
+  border-radius: 16px;
+  padding: 12px 16px;
+  position: relative;
+  box-shadow: var(--shadow);
+  flex: 1;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.4;
+}
+
+.speech-bubble::before {
+  content: '';
+  position: absolute;
+  left: -16px;
+  top: 20px;
+  border: 8px solid transparent;
+  border-right-color: var(--ink);
+}
+.speech-bubble::after {
+  content: '';
+  position: absolute;
+  left: -12px;
+  top: 21px;
+  border: 7px solid transparent;
+  border-right-color: white;
+}
+
+.caller-name-tag {
+  background: var(--gold);
+  border: 3px solid var(--ink);
+  border-radius: 8px;
+  padding: 3px 10px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 0.85rem;
+  color: var(--ink);
+  display: inline-block;
+  margin-bottom: 6px;
+  box-shadow: 2px 2px 0 var(--ink);
+}
+
+/* OPTIONS */
+#options-area { display: none; }
+
+.option-btn {
+  width: 100%;
+  background: white;
+  border: 4px solid var(--ink);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--ink);
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.1s;
+  box-shadow: 4px 4px 0 var(--ink);
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  position: relative;
+}
+
+.option-btn:hover:not(:disabled) {
+  transform: translate(-2px,-2px);
+  box-shadow: 6px 6px 0 var(--ink);
+  background: var(--gold-light);
+}
+
+.option-btn:active:not(:disabled) {
+  transform: translate(2px,2px);
+  box-shadow: 2px 2px 0 var(--ink);
+}
+
+.option-btn:disabled { cursor: default; }
+
+.option-btn.bad-hint {
+  border-color: var(--red);
+  background: #FFF0EE;
+  box-shadow: 4px 4px 0 var(--red);
+}
+
+.option-btn.bad-hint .opt-letter { background: var(--red); color: white; }
+
+.option-btn.selected-good {
+  background: #E8FFE8;
+  border-color: var(--green);
+  box-shadow: 4px 4px 0 var(--green);
+}
+
+.option-btn.selected-bad {
+  background: #FFE8E8;
+  border-color: var(--red);
+  box-shadow: 4px 4px 0 var(--red);
+}
+
+.option-btn.selected-ok {
+  background: #FFF8E0;
+  border-color: var(--orange);
+  box-shadow: 4px 4px 0 var(--orange);
+}
+
+.option-btn.dimmed { opacity: 0.4; }
+
+.opt-letter {
+  background: var(--ink);
+  color: var(--gold);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Bangers', cursive;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.compliance-badge {
+  position: absolute;
+  top: -10px; right: 10px;
+  background: var(--red);
+  color: white;
+  font-family: 'Fredoka One', cursive;
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  border-radius: 10px;
+  border: 2px solid var(--ink);
+}
+
+/* RESULT POPUP */
+#result-popup {
+  display: none;
+  background: var(--panel-bg);
+  border: var(--outline);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: var(--shadow-lg);
+  animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  margin-top: 12px;
+}
+
+@keyframes popIn {
+  from { transform: scale(0.7); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.result-header {
+  font-family: 'Bangers', cursive;
+  font-size: 2rem;
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+}
+
+.result-header.good { color: var(--green); }
+.result-header.bad { color: var(--red); }
+.result-header.ok { color: var(--orange); }
+
+.feedback-box {
+  background: white;
+  border: 3px solid var(--ink);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 0.9rem;
+  margin: 8px 0;
+  font-weight: 600;
+}
+
+.sale-amount {
+  font-family: 'Bangers', cursive;
+  font-size: 2.5rem;
+  color: var(--green);
+  text-shadow: 3px 3px 0 var(--ink);
+  letter-spacing: 2px;
+}
+
+#next-btn {
+  background: var(--gold);
+  border: 4px solid var(--ink);
+  border-radius: 50px;
+  padding: 12px 32px;
+  font-family: 'Bangers', cursive;
+  font-size: 1.5rem;
+  letter-spacing: 2px;
+  color: var(--ink);
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  transition: all 0.1s;
+  margin-top: 10px;
+  width: 100%;
+}
+#next-btn:hover { transform: translate(-2px,-2px); box-shadow: 6px 6px 0 var(--ink); }
+
+/* BAD CALL SCREEN */
+#bad-call-screen {
+  display: none;
+  text-align: center;
+  padding: 20px;
+  animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.bad-call-emoji {
+  font-size: 5rem;
+  display: block;
+  animation: shake 0.4s ease;
+}
+
+@keyframes shake {
+  0%,100%{transform:translateX(0)} 20%{transform:translateX(-10px)} 40%{transform:translateX(10px)} 60%{transform:translateX(-8px)} 80%{transform:translateX(8px)}
+}
+
+/* SIDEBAR */
+.tab-buttons {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.tab-btn {
+  flex: 1;
+  background: #ddd;
+  border: 3px solid var(--ink);
+  border-radius: 8px;
+  padding: 6px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 0.8rem;
+  cursor: pointer;
+  box-shadow: 2px 2px 0 var(--ink);
+  transition: all 0.1s;
+  color: var(--ink);
+}
+
+.tab-btn.active {
+  background: var(--gold);
+  transform: translate(-1px,-1px);
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* MARKET */
+.metal-card {
+  background: white;
+  border: 3px solid var(--ink);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+.metal-name {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1rem;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.metal-price {
+  font-family: 'Bangers', cursive;
+  font-size: 1.4rem;
+  color: var(--ink);
+  letter-spacing: 1px;
+}
+
+.price-change {
+  font-family: 'Fredoka One', cursive;
+  font-size: 0.8rem;
+  padding: 1px 6px;
+  border-radius: 10px;
+  display: inline-block;
+}
+
+.price-change.up { background: #E8FFE8; color: var(--green); border: 2px solid var(--green); }
+.price-change.down { background: #FFE8E8; color: var(--red); border: 2px solid var(--red); }
+
+.metal-owned {
+  font-size: 0.75rem;
+  color: #777;
+  font-weight: 700;
+  margin: 3px 0;
+}
+
+.buy-sell-row {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  margin-top: 6px;
+}
+
+.qty-input {
+  width: 44px;
+  border: 3px solid var(--ink);
+  border-radius: 6px;
+  padding: 4px 6px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 0.9rem;
+  text-align: center;
+  background: var(--cream);
+}
+
+.buy-btn, .sell-btn {
+  flex: 1;
+  border: 3px solid var(--ink);
+  border-radius: 8px;
+  padding: 5px 8px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 0.8rem;
+  cursor: pointer;
+  box-shadow: 2px 2px 0 var(--ink);
+  transition: all 0.1s;
+}
+
+.buy-btn { background: var(--green); color: white; }
+.sell-btn { background: var(--red); color: white; }
+.buy-btn:hover:not(:disabled), .sell-btn:hover:not(:disabled) { transform: translate(-1px,-1px); box-shadow: 3px 3px 0 var(--ink); }
+.buy-btn:disabled, .sell-btn:disabled { background: #ccc; cursor: not-allowed; color: #999; }
+
+/* UPGRADES */
+.upgrade-card {
+  background: white;
+  border: 3px solid var(--ink);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  box-shadow: 3px 3px 0 var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.upgrade-icon { font-size: 1.8rem; }
+
+.upgrade-info { flex: 1; }
+.upgrade-name {
+  font-family: 'Fredoka One', cursive;
+  font-size: 0.95rem;
+  color: var(--ink);
+}
+.upgrade-desc {
+  font-size: 0.72rem;
+  color: #666;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.upgrade-level-dots {
+  display: flex; gap: 3px; margin-top: 3px;
+}
+.lvl-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--ink);
+  background: #ddd;
+}
+.lvl-dot.filled { background: var(--gold); }
+
+.upgrade-buy-btn {
+  background: var(--gold);
+  border: 3px solid var(--ink);
+  border-radius: 8px;
+  padding: 5px 10px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 0.8rem;
+  cursor: pointer;
+  box-shadow: 2px 2px 0 var(--ink);
+  color: var(--ink);
+  transition: all 0.1s;
+  white-space: nowrap;
+}
+.upgrade-buy-btn:hover:not(:disabled) { transform: translate(-1px,-1px); }
+.upgrade-buy-btn:disabled { background: #ddd; cursor: not-allowed; color: #999; }
+.upgrade-buy-btn.maxed { background: #c8a84b; color: white; }
+
+/* CALL LOG */
+.log-entry {
+  background: white;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin-bottom: 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+.log-entry.win { border-color: var(--green); background: #F0FFF0; }
+.log-entry.loss { border-color: #ccc; }
+.log-entry.violation { border-color: var(--red); background: #FFF0F0; }
+.log-entry.badcall { border-color: #FF9500; background: #FFF8EE; }
+
+/* COMPLIANCE WARNING */
+#compliance-tip-box {
+  display: none;
+  background: #FFF3CD;
+  border: 3px solid #FF9500;
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #7A4800;
+  box-shadow: 3px 3px 0 #FF9500;
+}
+
+/* TICKER */
+#ticker-bar {
+  background: var(--ink);
+  color: var(--gold);
+  padding: 5px 0;
+  overflow: hidden;
+  white-space: nowrap;
+  border-top: 3px solid var(--gold);
+  border-bottom: 3px solid var(--gold);
+}
+
+#ticker-inner {
+  display: inline-block;
+  animation: ticker 25s linear infinite;
+  font-family: 'Fredoka One', cursive;
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+}
+
+@keyframes ticker { from { transform: translateX(100vw); } to { transform: translateX(-100%); } }
+
+/* PROGRESS BAR */
+.progress-bar-outer {
+  background: #ddd;
+  border: 3px solid var(--ink);
+  border-radius: 20px;
+  height: 20px;
+  overflow: hidden;
+  margin: 6px 0;
+}
+.progress-bar-inner {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold), #FF9500);
+  border-radius: 20px;
+  transition: width 0.5s ease;
+}
+
+/* COINS ANIMATION */
+.coin-pop {
+  position: fixed;
+  font-size: 2rem;
+  pointer-events: none;
+  z-index: 9999;
+  animation: coinFly 1.2s ease-out forwards;
+}
+@keyframes coinFly {
+  0% { transform: translateY(0) scale(1); opacity: 1; }
+  100% { transform: translateY(-120px) scale(0.5); opacity: 0; }
+}
+
+/* RINGING ANIMATION */
+@keyframes phoneRing {
+  0%,100%{transform:rotate(0deg)}
+  10%{transform:rotate(-15deg)}
+  20%{transform:rotate(15deg)}
+  30%{transform:rotate(-10deg)}
+  40%{transform:rotate(10deg)}
+  50%{transform:rotate(0deg)}
+}
+
+.ringing { animation: phoneRing 0.6s ease infinite; display: inline-block; }
+
+/* STARS */
+.stars {
+  font-size: 1.5rem;
+  letter-spacing: 4px;
+}
+
+/* TOOLTIP for compliance */
+.compliance-tip-inline {
+  background: #FFF3CD;
+  border: 2px solid #FF9500;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 0.78rem;
+  color: #7A4800;
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+/* INTRO SCREEN */
+#intro-screen {
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 0 16px;
+  text-align: center;
+}
+
+.intro-panel {
+  background: var(--panel-bg);
+  border: 5px solid var(--ink);
+  border-radius: 20px;
+  box-shadow: 8px 8px 0 var(--ink);
+  padding: 30px;
+}
+
+.intro-title {
+  font-family: 'Bangers', cursive;
+  font-size: 4rem;
+  color: var(--gold);
+  text-shadow: 4px 4px 0 var(--ink), -2px -2px 0 var(--gold-dark);
+  letter-spacing: 4px;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+.intro-subtitle {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.2rem;
+  color: var(--ink);
+  margin-bottom: 20px;
+}
+
+.intro-phone {
+  font-size: 5rem;
+  display: block;
+  animation: phoneRing 1s ease infinite;
+  margin: 10px 0;
+}
+
+.start-btn {
+  background: linear-gradient(135deg, var(--gold), #FF9500);
+  border: 5px solid var(--ink);
+  border-radius: 50px;
+  padding: 16px 48px;
+  font-family: 'Bangers', cursive;
+  font-size: 2rem;
+  letter-spacing: 3px;
+  color: var(--ink);
+  cursor: pointer;
+  box-shadow: var(--shadow-lg);
+  transition: all 0.1s;
+  margin-top: 16px;
+  text-shadow: 1px 1px 0 rgba(255,255,255,0.3);
+}
+.start-btn:hover { transform: translate(-3px,-3px); box-shadow: 9px 9px 0 var(--ink); }
+
+.intro-rules {
+  text-align: left;
+  background: white;
+  border: 3px solid var(--ink);
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin: 16px 0;
+  box-shadow: 4px 4px 0 var(--ink);
+}
+
+.intro-rules h3 {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.1rem;
+  margin-bottom: 8px;
+  color: var(--ink);
+}
+
+.intro-rules ul {
+  padding-left: 18px;
+}
+
+.intro-rules li {
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin-bottom: 5px;
+  color: #333;
+}
+
+</style>
+</head>
+<body>
+
+<!-- INTRO SCREEN -->
+<div id="intro-screen">
+  <div class="intro-panel">
+    <div class="intro-title">GOLD RUSH!</div>
+    <div class="intro-subtitle">THE COLD-CALLING PRECIOUS METALS GAME</div>
+    <span class="intro-phone">📞</span>
+    <div class="intro-rules">
+      <h3>📋 HOW TO PLAY</h3>
+      <ul>
+        <li>🥇 You're a precious metals salesperson — sell gold, silver, platinum & palladium</li>
+        <li>📞 Dial random numbers and handle objections to close sales</li>
+        <li>⚖️ You're NOT a financial advisor, CPA, or lawyer — stay compliant!</li>
+        <li>💸 Earn commission and invest in metals yourself to grow your fortune</li>
+        <li>🔧 Buy upgrades to improve your odds and skill</li>
+        <li>⚠️ Compliance violations = NO sale and a warning strike</li>
+      </ul>
+    </div>
+    <button class="start-btn" onclick="startGame()">LET'S DIAL! 📞</button>
+  </div>
+</div>
+
+<!-- GAME SCREEN (hidden initially) -->
+<div id="game-screen" style="display:none;">
+
+  <!-- TICKER -->
+  <div id="ticker-bar">
+    <span id="ticker-inner">Loading prices...</span>
+  </div>
+
+  <!-- HEADER -->
+  <div id="header">
+    <div id="logo">GOLD<span>RUSH!</span></div>
+    <div class="stat-pills">
+      <div class="stat-pill">💰 <span id="cash-display">$2,000</span></div>
+      <div class="stat-pill">📞 <span id="calls-display">0</span></div>
+      <div class="stat-pill green">✅ <span id="sales-display">0</span></div>
+      <div class="stat-pill red">⚠️ <span id="violations-display">0</span></div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div id="main">
+
+    <!-- LEFT: CALL AREA -->
+    <div>
+      <div class="panel">
+        <div class="panel-header">📞 CALL CENTER</div>
+        <div class="panel-body">
+
+          <!-- PHONE DISPLAY -->
+          <div id="phone-screen">
+            <div id="phone-number">___-___-____</div>
+            <div id="phone-status" style="color:#888; font-family:'Fredoka One',cursive;">Ready to dial!</div>
+          </div>
+
+          <!-- DIAL BUTTON (shown when idle) -->
+          <div id="dial-area">
+            <button id="call-btn" onclick="dialNumber()">📞 DIAL!</button>
+          </div>
+
+          <!-- BAD CALL SCREEN -->
+          <div id="bad-call-screen">
+            <span class="bad-call-emoji" id="bad-call-emoji">😤</span>
+            <div id="bad-call-msg" style="font-family:'Fredoka One',cursive;font-size:1.2rem;margin:10px 0;color:var(--ink);">Click. Hung up.</div>
+            <button id="next-btn-bad" class="buy-btn" style="margin-top:12px;border:4px solid var(--ink);border-radius:30px;padding:10px 28px;font-size:1.1rem;box-shadow:var(--shadow);" onclick="nextCall()">NEXT CALL →</button>
+          </div>
+
+          <!-- CALLER AREA -->
+          <div id="caller-area">
+            <div class="caller-bubble">
+              <div class="caller-avatar" id="caller-avatar">👤</div>
+              <div>
+                <div class="caller-name-tag" id="caller-name-tag">Unknown Caller</div>
+                <div class="speech-bubble" id="caller-speech">...</div>
+              </div>
+            </div>
+
+            <!-- COMPLIANCE TIP -->
+            <div id="compliance-tip-box">
+              📋 <span id="compliance-tip-text"></span>
+            </div>
+
+            <!-- OPTIONS -->
+            <div id="options-area">
+              <div id="options-container"></div>
+            </div>
+
+            <!-- RESULT POPUP -->
+            <div id="result-popup">
+              <div class="result-header" id="result-header">GREAT ANSWER!</div>
+              <div class="feedback-box" id="result-feedback"></div>
+              <div id="result-reaction" style="font-size:0.9rem;font-weight:700;margin-bottom:8px;color:#555;font-style:italic;"></div>
+              <div id="result-sale" style="margin-bottom:8px;"></div>
+              <div id="result-score-area"></div>
+              <button id="next-btn" onclick="nextCallOrContinue()">NEXT CALL →</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: SIDEBAR -->
+    <div>
+      <div class="panel" style="margin-bottom:16px;">
+        <div class="panel-header">📊 STATS</div>
+        <div class="panel-body">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+            <span style="font-weight:800;">Total Earned:</span>
+            <span id="total-earned-display" style="font-family:'Fredoka One',cursive;color:var(--green);">$0</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+            <span style="font-weight:800;">Portfolio Value:</span>
+            <span id="portfolio-display" style="font-family:'Fredoka One',cursive;color:var(--gold-dark);">$0</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+            <span style="font-weight:800;">Bad Call Rate:</span>
+            <span id="bad-rate-display" style="font-family:'Fredoka One',cursive;color:var(--red);">35%</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">🗂️ MENU</div>
+        <div class="panel-body">
+          <div class="tab-buttons">
+            <button class="tab-btn active" onclick="showTab('market')">💰 MARKET</button>
+            <button class="tab-btn" onclick="showTab('upgrades')">🔧 UPGRADES</button>
+            <button class="tab-btn" onclick="showTab('log')">📋 LOG</button>
+          </div>
+
+          <!-- MARKET TAB -->
+          <div class="tab-content active" id="tab-market">
+            <div id="metals-market"></div>
+          </div>
+
+          <!-- UPGRADES TAB -->
+          <div class="tab-content" id="tab-upgrades">
+            <div id="upgrades-container"></div>
+          </div>
+
+          <!-- LOG TAB -->
+          <div class="tab-content" id="tab-log">
+            <div id="call-log" style="max-height:400px;overflow-y:auto;">
+              <div style="font-family:'Fredoka One',cursive;color:#999;text-align:center;padding:20px;">No calls yet!</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// GAME DATA
+// ═══════════════════════════════════════════════════════════════
+
+const UPGRADES_DEF = [
+  { id:'filter', name:'Call Screener', desc:'Reduces bad call chance by 20% per level', cost:500, maxLevel:3, icon:'📡',
+    effect: (lvl) => `Bad call rate: ${Math.max(5, 35 - lvl*20)}%` },
+  { id:'hint', name:'Bad Answer Highlight', desc:'Marks risky compliance answers in red', cost:750, maxLevel:1, icon:'💡',
+    effect: () => 'Wrong answers shown in red' },
+  { id:'volume', name:'Lead Quality Boost', desc:'Increases potential sale sizes by 25% per level', cost:1200, maxLevel:4, icon:'📈',
+    effect: (lvl) => `+${lvl*25}% sale size` },
+  { id:'script', name:'Compliance Coach', desc:'Shows a compliance tip before each objection', cost:600, maxLevel:1, icon:'📋',
+    effect: () => 'Compliance tips unlocked' },
+  { id:'closer', name:'Closing Bonus', desc:'+15% close chance per level', cost:1500, maxLevel:3, icon:'🤝',
+    effect: (lvl) => `+${lvl*15}% close rate` },
+];
+
+// ─── PREGENERATED CONVERSATION TREES ─────────────────────────
+// Each call: { type, callerName, avatar, bgColor, intro, objection, options[], followUp }
+// options: { text, quality: 'great'|'good'|'mediocre'|'bad', complianceRisk: bool,
+//            reaction, score, saleChance, salePotential, feedback, violation: bool, violationNote }
+
+const CALL_TREES = [
+
+  // ══════════ RETIREE TYPE (5 calls) ══════════
+  {
+    type:'retiree', callerName:'Harold, 71', avatar:'👴', bgColor:'#E8F4FF',
+    intro:"Hello? Who is this calling?",
+    objection:"Is gold actually a safe investment? I'm retired and can't afford to lose money.",
+    complianceTip:"You cannot guarantee safety or returns. Acknowledge risk honestly and explain diversification benefits without making promises.",
+    options:[
+      { text:"Gold has historically been a store of value used for thousands of years. Many people include it as part of a diversified portfolio, but like any investment, it does carry risk. I'd suggest discussing with your financial advisor how it might fit your situation.",
+        quality:'great', complianceRisk:false,
+        reaction:"That's... actually a refreshingly honest answer. Most salespeople oversell it.",
+        score:95, saleChance:70, salePotential:8000,
+        feedback:"Perfect — honest about risk, deferred to advisor. You built real trust.", violation:false },
+      { text:"Gold tends to hold value better than paper money during inflation. It's not risk-free, but many retirees keep a portion of their savings in physical metals for stability.",
+        quality:'good', complianceRisk:false,
+        reaction:"Hmm, I hadn't thought about inflation protection. That makes sense.",
+        score:78, saleChance:55, salePotential:6000,
+        feedback:"Solid answer — good inflation point, appropriate caveats.", violation:false },
+      { text:"Gold is definitely safer than stocks, Harold. It never goes to zero!",
+        quality:'bad', complianceRisk:true,
+        reaction:"That sounds like a guarantee... I'm not sure I believe that.",
+        score:15, saleChance:5, salePotential:0,
+        feedback:"Never claim something is 'definitely safer' — that's a comparative investment claim you're not qualified to make.", violation:true, violationNote:"Comparative safety claim and implied guarantee ('never goes to zero')." },
+      { text:"A lot of our retired clients keep 5-10% of their portfolio in gold. It's a personal decision, but I can send you information on what we offer and you can decide from there.",
+        quality:'mediocre', complianceRisk:false,
+        reaction:"I suppose sending information wouldn't hurt.",
+        score:55, saleChance:35, salePotential:3000,
+        feedback:"Decent pivot to low-pressure, but didn't actually address the safety concern.", violation:false },
+    ]
+  },
+
+  {
+    type:'retiree', callerName:'Edna, 68', avatar:'👵', bgColor:'#FFF0F5',
+    intro:"Oh hello, I almost didn't answer. What can I do for you?",
+    objection:"My financial advisor told me not to invest in precious metals. Why should I go against that advice?",
+    complianceTip:"Never badmouth or undermine their financial advisor. Suggest it as a conversation topic, not a conflict.",
+    options:[
+      { text:"You absolutely shouldn't go against your advisor's guidance — they know your full financial picture. What I can offer is some information about physical metals that you could bring to your next meeting with them. Maybe it fits, maybe it doesn't.",
+        quality:'great', complianceRisk:false,
+        reaction:"That's very sensible. I like that you're not trying to talk me around my advisor.",
+        score:92, saleChance:60, salePotential:7500,
+        feedback:"Excellent — you reinforced her advisor relationship instead of attacking it. High trust.", violation:false },
+      { text:"That's worth respecting! Financial advisors sometimes overlook physical assets like gold. It might just be worth a quick conversation with them about it.",
+        quality:'good', complianceRisk:false,
+        reaction:"You might be right. I could ask him about it next time.",
+        score:72, saleChance:45, salePotential:5000,
+        feedback:"Good angle — suggesting she bring it to her advisor is the right move.", violation:false },
+      { text:"With all due respect, financial advisors often push paper assets because that's how they get paid. Physical gold is different — it's yours, no middleman.",
+        quality:'bad', complianceRisk:true,
+        reaction:"Excuse me? Are you criticizing my advisor? I don't think I want to continue this.",
+        score:5, saleChance:2, salePotential:0,
+        feedback:"Never criticize a client's financial advisor — major compliance and relationship red flag.", violation:true, violationNote:"Disparaging a licensed financial advisor is a serious compliance violation." },
+      { text:"Well, every advisor has a different philosophy. Gold is just another option — no pressure from me.",
+        quality:'mediocre', complianceRisk:false,
+        reaction:"I appreciate that you're not pushing.",
+        score:50, saleChance:25, salePotential:2000,
+        feedback:"Neutral but missed the opportunity to reframe gold as a complement, not a conflict.", violation:false },
+    ]
+  },
+
+  {
+    type:'retiree', callerName:'Frank, 74', avatar:'👴', bgColor:'#F0FFF0',
+    intro:"Hello? Speak up please, who's this?",
+    objection:"How do I know the gold is real? I've heard about scams where people send fake coins.",
+    complianceTip:"Be transparent about authentication, assay certificates, and storage options. This is factual product knowledge, not financial advice.",
+    options:[
+      { text:"That's a totally legitimate concern. All our gold bars and coins come with assay certificates verifying purity and weight. We also offer storage through IRS-approved insured depositories, and we can ship directly to you with third-party authentication.",
+        quality:'great', complianceRisk:false,
+        reaction:"Assay certificates — I hadn't heard of those. That does sound more serious than a random coin dealer.",
+        score:90, saleChance:68, salePotential:9000,
+        feedback:"Great product knowledge, directly addressed the fraud concern with concrete safeguards.", violation:false },
+      { text:"We're a registered dealer and only carry LBMA-approved bullion. Every piece is hallmarked and verifiable. The metals can also be stored in a verified vault on your behalf.",
+        quality:'good', complianceRisk:false,
+        reaction:"LBMA — I'll have to look that up. But it sounds official.",
+        score:75, saleChance:52, salePotential:7000,
+        feedback:"Solid credentials, though you could have explained LBMA briefly for a non-expert.", violation:false },
+      { text:"Don't worry about fakes, Frank — we've been doing this for years and never had a complaint. Our gold is 100% guaranteed genuine.",
+        quality:'bad', complianceRisk:true,
+        reaction:"That's a bold claim. How can you guarantee that over the phone?",
+        score:20, saleChance:10, salePotential:0,
+        feedback:"'100% guaranteed' is a vague promise that could create legal liability. Always back claims with specifics.", violation:true, violationNote:"Unsubstantiated guarantee — vague quality promises without documentation." },
+      { text:"You can always have any piece independently tested by a local coin dealer or jeweler after purchase.",
+        quality:'mediocre', complianceRisk:false,
+        reaction:"That's... reassuring I suppose, but it feels like a lot of work on my end.",
+        score:48, saleChance:30, salePotential:3500,
+        feedback:"Not wrong, but puts the burden on the customer. Lead with your own authentication process first.", violation:false },
+    ]
+  },
+
+  {
+    type:'retiree', callerName:'Dorothy, 70', avatar:'👵', bgColor:'#FFF8E0',
+    intro:"Yes? Oh I thought this was my daughter calling. Go ahead.",
+    objection:"I'm on a fixed income. I can't afford to lose what little I have.",
+    complianceTip:"Acknowledge the real risk. Suggest only investing what they can afford to set aside long-term. Never minimize risk or push someone beyond their means.",
+    options:[
+      { text:"I completely understand, and that concern should absolutely guide any decision you make. Physical metals aren't for everyone — they're better suited as a long-term hold for money you don't need immediately. If your budget is tight, it might not be the right fit right now.",
+        quality:'great', complianceRisk:false,
+        reaction:"I appreciate your honesty. You're the first one to say that.",
+        score:94, saleChance:65, salePotential:2500,
+        feedback:"Outstanding compliance and empathy — showing integrity like this actually builds long-term trust.", violation:false },
+      { text:"Precious metals tend to hold value over time, which some people on fixed incomes appreciate as a hedge. But I'd only suggest starting with a small amount — whatever feels comfortable to you.",
+        quality:'good', complianceRisk:false,
+        reaction:"A small amount... I suppose I could consider that.",
+        score:74, saleChance:48, salePotential:1500,
+        feedback:"Good responsible framing — suggesting a small entry point is appropriate.", violation:false },
+      { text:"Actually gold is one of the safest places to park cash. It'll protect your savings better than a bank account!",
+        quality:'bad', complianceRisk:true,
+        reaction:"You're making a lot of claims that sound too good to be true...",
+        score:10, saleChance:3, salePotential:0,
+        feedback:"Comparing gold to bank accounts as 'safer' is an investment claim beyond your scope.", violation:true, violationNote:"Comparative safety claim and implying guaranteed protection." },
+      { text:"Even a small allocation can make sense. We have entry options starting at a few hundred dollars.",
+        quality:'mediocre', complianceRisk:false,
+        reaction:"A few hundred... maybe.",
+        score:52, saleChance:35, salePotential:800,
+        feedback:"Adequate pivot to low-entry options, but didn't acknowledge her risk concern enough.", violation:false },
+    ]
+  },
+
+  {
+    type:'retiree', callerName:'Bernard, 77', avatar:'👴', bgColor:'#F5F0FF',
+    intro:"Bernard speaking. Make it quick please, Jeopardy starts soon.",
+    objection:"What happens to the gold when I die? I don't want my kids stuck with this.",
+    complianceTip:"Estate questions are legal and tax matters — direct to an estate attorney and CPA. You can explain how physical metals transfer as property but can't advise on estate planning.",
+    options:[
+      { text:"That's a really thoughtful question, and it's a legal and estate matter — so I'd strongly recommend talking to your estate attorney about how physical assets like gold fit into your will or trust. What I can tell you is that physical gold is tangible personal property, which means it transfers like any other asset, but the specifics are really for an attorney.",
+        quality:'great', complianceRisk:false,
+        reaction:"Good answer — you didn't pretend to be a lawyer. I like that.",
+        score:93, saleChance:66, salePotential:12000,
+        feedback:"Perfect redirection to proper legal counsel while still providing useful context.", violation:false },
+      { text:"Physical gold is real property, so it can be included in your estate the same way as jewelry or real estate. Your estate attorney or CPA can tell you exactly how it works for your situation.",
+        quality:'good', complianceRisk:false,
+        reaction:"That makes sense. It's just property. I hadn't thought of it that way.",
+        score:80, saleChance:55, salePotential:10000,
+        feedback:"Good framing as property with proper referral to professionals.", violation:false },
+      { text:"Gold is actually one of the best things to leave to your kids! It's tax-free to inherit and keeps its value forever.",
+        quality:'bad', complianceRisk:true,
+        reaction:"Tax-free? Are you a tax advisor?",
+        score:8, saleChance:2, salePotential:0,
+        feedback:"Inheritance tax treatment varies by jurisdiction and individual situation — this is pure tax advice you cannot give.", violation:true, violationNote:"Tax advice on inheritance — outside scope; requires CPA or estate attorney." },
+      { text:"Many of our clients keep gold in named accounts or vaults that transfer easily. I can send you our info on storage options.",
+        quality:'mediocre', complianceRisk:false,
+        reaction:"Well, that might be worth reading.",
+        score:55, saleChance:38, salePotential:5000,
+        feedback:"Okay pivot to storage info, but didn't address the estate question directly or properly redirect.", violation:false },
+    ]
+  },
+
+  // ══════════ SKEPTIC TYPE (5 calls) ══════════
+  {
+    type:'skeptic', callerName:'Kevin, 45', avatar:'🧐', bgColor:'#F0F8FF',
+    intro:"Who is this? How did you get my number?",
+    objection:"This sounds exactly like a scam. Cold calling people about gold? Come on.",
+    complianceTip:"Be fully transparent about who you are, how you obtained their contact, and that you're a registered dealer. Acknowledge the concern as legitimate.",
+    options:[
+      { text:"That's a completely fair reaction, and I appreciate you saying it directly. My name is [name] from [company], a registered precious metals dealer. Your number came through a lead service of people who expressed interest in alternative investments. If you want, I can give you our company's website and registration info right now so you can verify us before we go any further.",
+        quality:'great', complianceRisk:false,
+        reaction:"...Huh. Most scammers don't offer to be verified. That's actually a point in your favor.",
+        score:96, saleChance:58, salePotential:15000,
+        feedback:"Exceptional transparency — offering verification is the single best response to a fraud accusation.", violation:false },
+      { text:"I totally understand the skepticism — there are a lot of bad actors out there. I'm [name] from [company]. We're a registered dealer and I can send you our credentials before we talk any further.",
+        quality:'good', complianceRisk:false,
+        reaction:"Alright, fine. What's the company name?",
+        score:80, saleChance:45, salePotential:12000,
+        feedback:"Good transparency and acknowledgment. Solid professional response.", violation:false },
+      { text:"Sir, we're a completely legit business. I wouldn't be calling you if we were a scam, now would I?",
+        quality:'bad', complianceRisk:false,
+        reaction:"...That's literally what a scammer would say.",
+        score:12, saleChance:5, salePotential:0,
+        feedback:"Defensive and unconvincing. This logic is circular and does nothing to build trust.", violation:false },
+      { text:"We get that a lot. I promise we're legitimate — we've been in business for years.",
+        quality:'mediocre', complianceRisk:false,
+        reaction:"Unsubstantiated promises don't exactly reassure me.",
+        score:38, saleChance:18, salePotential:3000,
+        feedback:"Vague assurances don't work with skeptics. Always offer specific, verifiable information.", violation:false },
+    ]
+  },
+
+  {
+    type:'skeptic', callerName:'Marissa, 39', avatar:'🧐', bgColor:'#FFF5F0',
+    intro:"Yes? I have about two minutes.",
+    objection:"Why would you cold call people about investments? Doesn't that scream desperation?",
+    complianceTip:"Be honest about your prospecting method. Don't be defensive — turn it into a differentiator.",
+    options:[
+      { text:"Ha, fair point! Cold outreach is an old-school method, but it works because we reach people directly rather than hiding behind flashy ads. We're upfront about who we are from the first second. No high-pressure tactics — if it's not a fit, no hard feelings.",
+        quality:'great', complianceRisk:false,
+        reaction:"I respect the directness. Most would have given me corporate-speak.",
+        score:88, saleChance:52, salePotential:11000,
+        feedback:"Confident, self-aware, and low-pressure. Turned a weakness into authenticity.", violation:false },
+      { text:"You're right to question it! Our outreach is old-fashioned, but so is the product — physical metal has been a store of value for 5,000 years. We like keeping it real.",
+        quality:'good', complianceRisk:false,
+        reaction:"That's an interesting way to frame it.",
+        score:72, saleChance:40, salePotential:8000,
+        feedback:"Creative pivot from the criticism. A bit gimmicky but still works.", violation:false },
+      { text:"We cold call because the ROI on gold is so good we can afford to — most clients see double-digit returns.",
+        quality:'bad', complianceRisk:true,
+        reaction:"Did you just cite return figures on a cold call? That's illegal.",
+        score:5, saleChance:1, salePotential:0,
+        feedback:"Never cite past returns as a selling point — that's textbook investment performance advertising which requires disclosures you don't have.", violation:true, violationNote:"Citing return figures without required disclaimers — securities advertising violation." },
+      { text:"We find it's an effective way to reach people who might not know we exist.",
+        quality:'mediocre', complianceRisk:false,
+        reaction:"That's... a non-answer.",
+        score:42, saleChance:22, salePotential:4000,
+        feedback:"Didn't engage with the concern at all. Address the skepticism head-on.", violation:false },
+    ]
+  },
+
+  {
+    type:'skeptic', callerName:'Dan, 52', avatar:'🧐', bgColor:'#F0FFF8',
+    intro:"Dan speaking.",
+    objection:"I don't invest in physical commodities. Too much hassle storing them.",
+    complianceTip:"This is a legitimate product objection — address storage options factually. You can explain IRS-approved depositories without guaranteeing specific services.",
+    options:[
+      { text:"That's actually one of the most common concerns, and there are options that address it. You don't have to store it yourself — we work with IRS-approved insured depositories that hold your metals on your behalf. You own it, it's allocated to you, and you can liquidate whenever you want without ever touching a bar.",
+        quality:'great', complianceRisk:false,
+        reaction:"Oh — I didn't know third-party storage was that accessible. That changes things.",
+        score:91, saleChance:62, salePotential:18000,
+        feedback:"Perfect objection handling — addressed the real pain point with a concrete solution.", violation:false },
+      { text:"If you don't want to deal with it at home, vault storage is an option. You own the metal, but it's kept in a secure facility. Very hands-off.",
+        quality:'good', complianceRisk:false,
+        reaction:"That does sound simpler. What does that cost?",
+        score:76, saleChance:50, salePotential:14000,
+        feedback:"Good practical answer. Could have mentioned IRS-approved status and insurance for added credibility.", violation:false },
+      { text:"Oh it's really not that complicated! You just put it in a safe and forget about it.",
+        quality:'bad', complianceRisk:false,
+        reaction:"That glosses over a lot of real logistics, doesn't it?",
+        score:18, saleChance:8, salePotential:0,
+        feedback:"Dismissive of a legitimate concern. 'Just put it in a safe' ignores insurance, security, and estate logistics.", violation:false },
+      { text:"We have information on storage options if you'd like me to email them.",
+        quality:'mediocre', complianceRisk:false,
+        reaction:"Sure, I guess.",
+        score:45, saleChance:28, salePotential:5000,
+        feedback:"Too passive — you had enough information to address the concern right there.", violation:false },
+    ]
+  },
+
+  {
+    type:'skeptic', callerName:'Pauline, 47', avatar:'🧐', bgColor:'#FFFFF0',
+    intro:"Hello, Pauline.",
+    objection:"I've read that gold is just speculative. There's no yield, no dividends. Why bother?",
+    complianceTip:"Acknowledge the valid point about no yield. Frame physical gold's role as a store of value and inflation hedge without making return predictions.",
+    options:[
+      { text:"You're absolutely right that physical gold has no yield or dividends — that's a real trade-off. What it offers instead is the potential to preserve purchasing power over time, especially in inflationary environments, and there's no counterparty risk since you own a physical asset outright. It's not for everyone, but some investors use it to balance a portfolio. Whether it fits yours is a question for your financial advisor.",
+        quality:'great', complianceRisk:false,
+        reaction:"I appreciate that you acknowledged the downside. Most salespeople dodge that.",
+        score:93, saleChance:60, salePotential:20000,
+        feedback:"Textbook handling — acknowledged the trade-off, explained the rationale honestly, deferred on fit.", violation:false },
+      { text:"That's a common debate. The case for gold isn't about income — it's about long-term wealth preservation and hedging against currency devaluation. Different role than a dividend stock.",
+        quality:'good', complianceRisk:false,
+        reaction:"I can see that argument. It's a different asset class.",
+        score:78, saleChance:48, salePotential:15000,
+        feedback:"Good framing of gold's distinct role in a portfolio without overclaiming.", violation:false },
+      { text:"Gold has outperformed stocks over the last decade. You'd be surprised at the returns!",
+        quality:'bad', complianceRisk:true,
+        reaction:"Can you back that up with actual data? And are you a financial advisor?",
+        score:8, saleChance:3, salePotential:0,
+        feedback:"Performance comparison claims without proper disclosures are a major compliance violation.", violation:true, violationNote:"Comparative performance claim — requires regulated investment disclosures." },
+      { text:"A lot of people find comfort in owning something physical and tangible.",
+        quality:'mediocre', complianceRisk:false,
+        reaction:"That's more psychological than financial.",
+        score:40, saleChance:20, salePotential:4000,
+        feedback:"Not wrong but weak — doesn't address her analytical objection meaningfully.", violation:false },
+    ]
+  },
+
+  {
+    type:'skeptic', callerName:'Tyler, 34', avatar:'🧐', bgColor:'#F8F0FF',
+    intro:"Yeah, what's up.",
+    objection:"Crypto is the new gold. Why would I buy actual metal in 2025?",
+    complianceTip:"Don't bash crypto or compare investment performance. Explain gold's unique properties without claiming superiority.",
+    options:[
+      { text:"Ha, that's a debate that gets heated! I'm not here to argue against crypto — both serve different purposes for different people. Gold's been a physical store of value for thousands of years with no digital infrastructure needed, no keys to lose, and it's tangible. Whether that matters to you is a personal call. Some people own both.",
+        quality:'great', complianceRisk:false,
+        reaction:"Fair enough. I actually never thought about the 'no keys to lose' angle.",
+        score:89, saleChance:50, salePotential:8000,
+        feedback:"Balanced, confident, and non-combative. Identified a genuine differentiator.", violation:false },
+      { text:"Crypto and gold solve different problems. Gold has 5,000 years of universal recognition and zero technology dependency. Some investors hold both for different reasons.",
+        quality:'good', complianceRisk:false,
+        reaction:"5,000 years versus 15 years. Yeah, that's a pretty big track record difference.",
+        score:75, saleChance:42, salePotential:6000,
+        feedback:"Good positioning of gold without dismissing crypto. Track record argument lands well.", violation:false },
+      { text:"Crypto is way too volatile. Gold is steady and proven — crypto could go to zero tomorrow.",
+        quality:'bad', complianceRisk:true,
+        reaction:"And gold can drop 20% too. You're making claims you can't back up.",
+        score:12, saleChance:5, salePotential:0,
+        feedback:"Comparative investment advice and implying crypto is unsafe while gold is safe — both claims are outside your scope.", violation:true, violationNote:"Comparative asset assessment — requires financial advisory credentials." },
+      { text:"Some people prefer something they can physically hold.",
+        quality:'mediocre', complianceRisk:false,
+        reaction:"I mean, I get that.",
+        score:42, saleChance:22, salePotential:2500,
+        feedback:"Too vague for a digitally-savvy prospect. He wanted a substantive answer.", violation:false },
+    ]
+  },
+
+  // ══════════ CURIOUS INVESTOR TYPE (5 calls) ══════════
+  {
+    type:'curious', callerName:'Sandra, 42', avatar:'🤔', bgColor:'#F0FFF0',
+    intro:"Hello, this is Sandra.",
+    objection:"What's the minimum investment? I don't want to be locked into a huge commitment.",
+    complianceTip:"This is a straightforward product question — answer factually and honestly.",
+    options:[
+      { text:"Great question! Entry points vary — you can start with a single 1-oz gold coin or silver bars at smaller denominations. There's no minimum forced commitment. You buy what you want, when you want, and can add to it over time. Silver especially is accessible at lower price points.",
+        quality:'great', complianceRisk:false,
+        reaction:"So I could start small and see how it goes? I like that.",
+        score:90, saleChance:72, salePotential:5000,
+        feedback:"Clear, practical, no-pressure. Mentioned silver as a low-barrier entry — smart.", violation:false },
+      { text:"We offer silver coins and bars starting around $25-30 each. Gold is higher per unit but there's no minimum — you buy one ounce if that's what you want.",
+        quality:'good', complianceRisk:false,
+        reaction:"Oh wow, I didn't realize silver was that accessible.",
+        score:78, saleChance:62, salePotential:3000,
+        feedback:"Concrete price anchoring works well with budget-conscious curious buyers.", violation:false },
+      { text:"Our best deals are on larger bulk orders of 10oz or more — that's where the savings really kick in.",
+        quality:'bad', complianceRisk:false,
+        reaction:"So there kind of is a minimum to get a good deal?",
+        score:22, saleChance:15, salePotential:500,
+        feedback:"Pivoted away from the question and implied pressure to buy more. Misreads what she was asking.", violation:false },
+      { text:"You can invest as little or as much as you're comfortable with.",
+        quality:'mediocre', complianceRisk:false,
+        reaction:"That's helpful but vague. What does 'a little' mean exactly?",
+        score:48, saleChance:38, salePotential:2000,
+        feedback:"Too vague — a curious investor wants numbers. Give them the specifics.", violation:false },
+    ]
+  },
+
+  {
+    type:'curious', callerName:'James, 38', avatar:'🤔', bgColor:'#FFFFF0',
+    intro:"James here, go ahead.",
+    objection:"I've been thinking about precious metals for a while. Can you compare your pricing to spot price?",
+    complianceTip:"This is a product pricing question — be honest about premiums over spot price. Transparency builds trust.",
+    options:[
+      { text:"Absolutely — we sell at spot plus a premium, which covers minting, handling, and dealer margin. For gold coins, the premium is typically 3-8% over spot, and silver tends to run a bit higher percentage-wise since the coins are smaller. I'll always quote you the exact premium before any transaction so there are no surprises.",
+        quality:'great', complianceRisk:false,
+        reaction:"I respect the transparency. A lot of dealers are cagey about that.",
+        score:94, saleChance:75, salePotential:22000,
+        feedback:"Honest pricing conversation with clear disclosure — builds huge trust with a knowledgeable buyer.", violation:false },
+      { text:"We price at spot plus a small premium for mint and handling. Premiums vary by product — I can give you a live quote on anything specific you're interested in.",
+        quality:'good', complianceRisk:false,
+        reaction:"Live quotes work for me. What do you have in 1oz gold bars?",
+        score:80, saleChance:65, salePotential:18000,
+        feedback:"Good honest answer and effective pivot to getting specific interest.", violation:false },
+      { text:"Our pricing is very competitive — basically at spot with almost no markup.",
+        quality:'bad', complianceRisk:false,
+        reaction:"That's not really accurate for any dealer I've researched.",
+        score:10, saleChance:5, salePotential:0,
+        feedback:"Misleading pricing claim — an informed buyer will know this is false and it destroys credibility.", violation:true, violationNote:"Materially misleading pricing representation." },
+      { text:"We're competitive with the market. I can send you a quote sheet.",
+        quality:'mediocre', complianceRisk:false,
+        reaction:"Sure. I'll look it over.",
+        score:50, saleChance:40, salePotential:8000,
+        feedback:"Ducked the specific question. A knowledgeable buyer wants numbers, not brochures.", violation:false },
+    ]
+  },
+
+  {
+    type:'curious', callerName:'Priya, 35', avatar:'🤔', bgColor:'#FFF5FF',
+    intro:"Hello! Oh, what timing — I was literally just reading about gold.",
+    objection:"How does storage actually work? Do I take delivery or does someone hold it for me?",
+    complianceTip:"This is a product/logistics question. Explain both options factually — home delivery and allocated vault storage.",
+    options:[
+      { text:"You have two main options. First, you can take direct delivery — we ship it to you insured and you store it at home or in a safe deposit box. Or you can use an allocated vault — a third-party IRS-approved depository that holds your specific metals in your name, with insurance included. The vault route is popular for larger holdings. Your choice entirely.",
+        quality:'great', complianceRisk:false,
+        reaction:"Both options! I didn't realize I had that flexibility. The vault sounds smart for larger amounts.",
+        score:93, saleChance:78, salePotential:16000,
+        feedback:"Comprehensive, clear, practical — exactly what a curious buyer needs to move forward.", violation:false },
+      { text:"You can take physical delivery — we ship it right to you. Or we can arrange third-party vault storage in an insured facility. Most people starting out take delivery; bigger buyers prefer the vault.",
+        quality:'good', complianceRisk:false,
+        reaction:"Smart breakdown. I'd probably start with delivery to see what it feels like.",
+        score:80, saleChance:65, salePotential:10000,
+        feedback:"Good clear answer with useful context on typical buyer behavior.", violation:false },
+      { text:"We'll send it to you in a plain brown box — very discreet, super easy!",
+        quality:'bad', complianceRisk:false,
+        reaction:"That sounds kind of insecure for a valuable shipment...",
+        score:20, saleChance:12, salePotential:0,
+        feedback:"Understated the security and logistics — a curious buyer wants professionalism, not casualness.", violation:false },
+      { text:"We offer both — I'll include details in the info I send you.",
+        quality:'mediocre', complianceRisk:false,
+        reaction:"Okay. Send it over.",
+        score:48, saleChance:42, salePotential:5000,
+        feedback:"Punted a simple question you could have answered. Engaged buyers want answers now.", violation:false },
+    ]
+  },
+
+  {
+    type:'curious', callerName:'Marcus, 41', avatar:'🤔', bgColor:'#F0F8FF',
+    intro:"Marcus speaking. I have a few minutes.",
+    objection:"What's the difference between gold coins and gold bars? Which should I buy?",
+    complianceTip:"This is product knowledge — answer factually. Avoid making investment recommendations on which is 'better' in a financial sense.",
+    options:[
+      { text:"Both are great options with slightly different trade-offs. Bars are typically lower premium over spot since they're simpler to mint — better value per ounce for larger holdings. Coins from government mints like American Eagles or Maples carry a slightly higher premium but are more recognizable and easier to sell or verify anywhere in the world. Which works better really depends on your goals, and I'd suggest talking through your situation.",
+        quality:'great', complianceRisk:false,
+        reaction:"I never knew coins had a liquidity advantage. That's genuinely useful info.",
+        score:92, saleChance:74, salePotential:19000,
+        feedback:"Excellent product knowledge with a real differentiator — liquidity of coins. Didn't over-recommend.", violation:false },
+      { text:"Bars have lower premiums for the same weight — better value per ounce. Coins from recognized mints are more universally liquid. It depends on whether you prioritize cost efficiency or ease of sale.",
+        quality:'good', complianceRisk:false,
+        reaction:"That's a helpful distinction. What government mints do you carry?",
+        score:78, saleChance:60, salePotential:14000,
+        feedback:"Clean, factual, informative. Prompted a good follow-up question.", violation:false },
+      { text:"Coins are basically the same as bars, just different shapes. Buy whichever is cheaper right now.",
+        quality:'bad', complianceRisk:false,
+        reaction:"That's a bit of an oversimplification, isn't it?",
+        score:18, saleChance:10, salePotential:0,
+        feedback:"Inaccurate and dismissive — coins and bars have real differences in premium, liquidity, and recognition.", violation:false },
+      { text:"They're both gold — personal preference mostly. I can send you pictures of both.",
+        quality:'mediocre', complianceRisk:false,
+        reaction:"I suppose that might help.",
+        score:45, saleChance:38, salePotential:5000,
+        feedback:"Missed an opportunity to demonstrate real expertise. 'Personal preference' undersells the real differences.", violation:false },
+    ]
+  },
+
+  {
+    type:'curious', callerName:'Lena, 29', avatar:'🤔', bgColor:'#FFF0F5',
+    intro:"Hi! I'm actually glad you called — I've been meaning to look into this.",
+    objection:"Are there tax implications I should know about when I sell gold?",
+    complianceTip:"Tax questions require a CPA. You can mention that physical gold is generally treated as a collectible for tax purposes, but avoid specific advice on rates, deductions, or strategies.",
+    options:[
+      { text:"Great question, and an important one! Physical precious metals are generally classified as collectibles by the IRS, which has specific tax treatment when you sell. But the specifics — rates, holding periods, reporting requirements — are really a conversation for your CPA or tax advisor since it depends on your income, holding period, and a lot of personal factors I'm not qualified to advise on.",
+        quality:'great', complianceRisk:false,
+        reaction:"Smart of you to point me to a CPA. I'll ask mine before I buy anything.",
+        score:96, saleChance:70, salePotential:9000,
+        feedback:"Excellent — mentioned the collectibles classification as factual context but correctly deferred on advice.", violation:false },
+      { text:"I'm not a tax advisor so I'd point you to your CPA for specifics. What I can say is that the IRS has specific rules for precious metals as collectibles — your CPA will know exactly what applies to you.",
+        quality:'good', complianceRisk:false,
+        reaction:"Fair enough. I'll loop in my accountant.",
+        score:82, saleChance:58, salePotential:7000,
+        feedback:"Appropriate redirection. Brief, honest, and professional.", violation:false },
+      { text:"Good news — gold sales are basically tax-exempt if you hold for over a year!",
+        quality:'bad', complianceRisk:true,
+        reaction:"That doesn't sound right at all. Are you a tax advisor?",
+        score:4, saleChance:1, salePotential:0,
+        feedback:"Wildly inaccurate and illegal tax advice. Gold collectibles have a specific capital gains rate — this claim is false and a serious violation.", violation:true, violationNote:"Specific tax advice — false and outside your scope as a metals salesperson." },
+      { text:"There may be some tax considerations — I'd recommend checking with a professional.",
+        quality:'mediocre', complianceRisk:false,
+        reaction:"Okay, that's vague but I appreciate the honesty.",
+        score:55, saleChance:42, salePotential:4000,
+        feedback:"Correct to redirect but too vague — the collectibles context would have been helpful and factual.", violation:false },
+    ]
+  },
+
+  // ══════════ ANGRY TYPE (4 calls) ══════════
+  {
+    type:'angry', callerName:'Greg, 55', avatar:'😤', bgColor:'#FFF0EE',
+    intro:"WHO IS THIS?!",
+    objection:"Take me OFF your list RIGHT NOW! I get 10 of these calls a day!",
+    complianceTip:"When someone requests to be removed from your call list, you MUST honor it immediately. This is a legal requirement under the TCPA.",
+    options:[
+      { text:"Absolutely — I'm removing you from our list right now, and I apologize for the interruption. You won't hear from us again. Have a good day.",
+        quality:'great', complianceRisk:false,
+        reaction:"...Fine. Thank you. Click.",
+        score:100, saleChance:0, salePotential:0,
+        feedback:"This is the ONLY acceptable response. Immediate removal, no argument, no upsell.", violation:false },
+      { text:"Of course, I'll remove you immediately. Sorry for the inconvenience!",
+        quality:'good', complianceRisk:false,
+        reaction:"Good. Do it. Goodbye.",
+        score:95, saleChance:0, salePotential:0,
+        feedback:"Correct response — quick, respectful, no pushback.", violation:false },
+      { text:"Wait, wait — just give me 30 seconds. You might be interested in—",
+        quality:'bad', complianceRisk:true,
+        reaction:"I said REMOVE ME. This is harassment!",
+        score:0, saleChance:0, salePotential:0,
+        feedback:"Continuing to pitch after an opt-out request is a TCPA violation. This is illegal.", violation:true, violationNote:"TCPA violation — continuing sales pitch after explicit opt-out request." },
+      { text:"I'll note your request, but it may take 30 days to process.",
+        quality:'mediocre', complianceRisk:true,
+        reaction:"30 DAYS?! That's not acceptable!",
+        score:20, saleChance:0, salePotential:0,
+        feedback:"While a processing window exists, leading with it inflames an already angry customer. Honor it immediately.", violation:false },
+    ]
+  },
+
+  {
+    type:'angry', callerName:'Susan, 61', avatar:'😤', bgColor:'#FFEEEE',
+    intro:"What do you want?",
+    objection:"I'm on the Do Not Call registry! You're not allowed to call me!",
+    complianceTip:"If they're on the DNC registry and you don't have a prior relationship or express permission, this is a serious compliance issue. Apologize, remove them, and escalate internally — do not argue.",
+    options:[
+      { text:"I sincerely apologize — if you're on the Do Not Call registry, this call should not have gone through. I'm removing your number right now and I'll flag this to our compliance team. Again, I'm truly sorry for the interruption.",
+        quality:'great', complianceRisk:false,
+        reaction:"Thank you for being honest about it. Most people argue. Goodbye.",
+        score:100, saleChance:0, salePotential:0,
+        feedback:"Perfect compliance response — acknowledge, apologize, remove, escalate. Protects you legally.", violation:false },
+      { text:"You're right and I apologize. Removing you now — this won't happen again.",
+        quality:'good', complianceRisk:false,
+        reaction:"Good. Goodbye.",
+        score:90, saleChance:0, salePotential:0,
+        feedback:"Fast, appropriate, and legally sound.", violation:false },
+      { text:"Actually, there are exemptions to the DNC list for certain types of businesses—",
+        quality:'bad', complianceRisk:true,
+        reaction:"I don't care about exemptions! This is harassment! I'm reporting you!",
+        score:0, saleChance:0, salePotential:0,
+        feedback:"Never argue DNC exemptions with an angry customer — even if technically applicable, this is a legal and PR disaster.", violation:true, violationNote:"Arguing against a DNC request — regulatory and legal exposure." },
+      { text:"I'm sorry about that. I'll pass your number to our team.",
+        quality:'mediocre', complianceRisk:false,
+        reaction:"You'd better. Goodbye.",
+        score:55, saleChance:0, salePotential:0,
+        feedback:"Adequate but passive — should confirm the removal yourself, not hand off responsibility.", violation:false },
+    ]
+  },
+
+  {
+    type:'angry', callerName:'Mike, 48', avatar:'😤', bgColor:'#FFF5F0',
+    intro:"Yeah hello, make it fast.",
+    objection:"I told your company last week to stop calling. Why are you calling again?!",
+    complianceTip:"Repeated calls after a removal request is a serious TCPA violation. Apologize, confirm removal, and escalate as a compliance issue.",
+    options:[
+      { text:"I'm very sorry — that should absolutely not have happened. I'm documenting this now and escalating it to our compliance team as a priority. You will not receive another call from us. I apologize for this genuinely.",
+        quality:'great', complianceRisk:false,
+        reaction:"Fine. Document it and make sure it doesn't happen again.",
+        score:100, saleChance:0, salePotential:0,
+        feedback:"Correct response — acknowledge the failure, take accountability, escalate as compliance breach.", violation:false },
+      { text:"I apologize — your removal request must not have gone through properly. I'm re-submitting it right now and making a note.",
+        quality:'good', complianceRisk:false,
+        reaction:"It better stick this time.",
+        score:80, saleChance:0, salePotential:0,
+        feedback:"Good — took ownership without deflecting. Confirmed action.", violation:false },
+      { text:"I don't have any record of a prior request in my system — are you sure you told us?",
+        quality:'bad', complianceRisk:true,
+        reaction:"Are you calling me a LIAR?!",
+        score:0, saleChance:0, salePotential:0,
+        feedback:"Never question a customer's opt-out claim. Assume it's valid and act accordingly.", violation:true, violationNote:"Disputing a customer's prior opt-out request — creates TCPA liability." },
+      { text:"I'll put a note on your account. Sorry about that.",
+        quality:'mediocre', complianceRisk:false,
+        reaction:"Just make sure it actually happens this time.",
+        score:45, saleChance:0, salePotential:0,
+        feedback:"Too casual — a repeat contact after opt-out is a serious matter, not just a note.", violation:false },
+    ]
+  },
+
+  {
+    type:'angry', callerName:'Linda, 58', avatar:'😤', bgColor:'#FFEEEE',
+    intro:"HELLO?! Who's calling me at this hour?!",
+    objection:"You woke me up! What time do you think it is?!",
+    complianceTip:"TCPA regulations restrict calls to between 8am-9pm local time. If you called outside those hours, that is a violation. Apologize and do not attempt to continue the call.",
+    options:[
+      { text:"I am so sorry — I should not have called outside of acceptable hours and I genuinely apologize. I'm removing your number from our calling list right now. Please have a good rest. Goodbye.",
+        quality:'great', complianceRisk:false,
+        reaction:"...Fine. I appreciate the apology. Don't call again.",
+        score:100, saleChance:0, salePotential:0,
+        feedback:"Clean, compliant, immediate. Apologize and disengage — the only correct play.", violation:false },
+      { text:"I'm so sorry to have disturbed you. I'll remove your number immediately.",
+        quality:'good', complianceRisk:false,
+        reaction:"Good. Don't call back.",
+        score:88, saleChance:0, salePotential:0,
+        feedback:"Appropriate — though flagging the compliance issue internally would also be wise.", violation:false },
+      { text:"It's 8:05 AM where I am — technically within business hours!",
+        quality:'bad', complianceRisk:true,
+        reaction:"I'm in CALIFORNIA! It's 5 AM! I'm calling a lawyer!",
+        score:0, saleChance:0, salePotential:0,
+        feedback:"Time zone errors are YOUR responsibility. Calling before 8am local time is a TCPA violation.", violation:true, violationNote:"TCPA time restriction violation — calls before 8am local recipient time." },
+      { text:"I apologize. I can call back at a better time if you'd like?",
+        quality:'mediocre', complianceRisk:false,
+        reaction:"NO! Do NOT call back!",
+        score:30, saleChance:0, salePotential:0,
+        feedback:"Offering to call back an already-angry person who was woken up is tone-deaf.", violation:false },
+    ]
+  },
+
+  // ══════════ INTERESTED BUYER TYPE (5 calls) ══════════
+  {
+    type:'interested', callerName:'Robert, 50', avatar:'😊', bgColor:'#F0FFF0',
+    intro:"Hi there! Actually, good timing — I've been thinking about diversifying.",
+    objection:"Tell me more about what you offer. I'm genuinely interested but want to know the details.",
+    complianceTip:"With an interested buyer, be thorough and professional. Cover products, pricing structure, storage, and always close with 'consult your financial advisor' to stay compliant.",
+    options:[
+      { text:"Happy to! We carry gold and silver bullion — bars and government-minted coins — as well as platinum and palladium. Pricing is at spot plus a small dealer premium that I'll quote exactly before any transaction. You can take physical delivery or use allocated vault storage at an insured depository. No contracts or subscriptions — you buy what you want. And I'd always recommend discussing it with your financial advisor to see how it fits your overall plan.",
+        quality:'great', complianceRisk:false,
+        reaction:"This is exactly the kind of clear rundown I was hoping for. What's your minimum order?",
+        score:97, saleChance:85, salePotential:30000,
+        feedback:"Comprehensive, honest, and hit the right notes. Ending with the advisor mention is the mark of a pro.", violation:false },
+      { text:"We specialize in physical bullion — gold bars and coins, silver, and some platinum. No paper contracts, you own the actual metal. Pricing is live market-based, and delivery or vault storage are both options.",
+        quality:'good', complianceRisk:false,
+        reaction:"Physical ownership — I like that. Walk me through the buying process.",
+        score:82, saleChance:72, salePotential:22000,
+        feedback:"Solid rundown that highlights ownership as a feature. Didn't mention the advisor recommendation but otherwise strong.", violation:false },
+      { text:"We offer gold, silver, platinum — all the precious metals. And our performance over the past 5 years has been incredible for our clients.",
+        quality:'bad', complianceRisk:true,
+        reaction:"Can you share those performance figures? And what are they based on?",
+        score:12, saleChance:10, salePotential:0,
+        feedback:"Performance claims require specific disclosures — never casually mention past performance without proper context and disclaimers.", violation:true, violationNote:"Past performance claim without required investment performance disclosures." },
+      { text:"We have a full product catalog I can email you with all the details.",
+        quality:'mediocre', complianceRisk:false,
+        reaction:"Sure, though I'd love a quick summary while I have you.",
+        score:48, saleChance:50, salePotential:8000,
+        feedback:"Punted on a warm prospect who's ready to engage. Always pitch while they're interested.", violation:false },
+    ]
+  },
+
+  {
+    type:'interested', callerName:'Rachel, 44', avatar:'😊', bgColor:'#FFF8E0',
+    intro:"Oh hello! I've actually been looking for someone who sells physical gold.",
+    objection:"What's your track record? How long have you been in business?",
+    complianceTip:"Answer honestly about credentials. Don't use track record as an implied performance endorsement.",
+    options:[
+      { text:"We've been operating as a registered precious metals dealer for over a decade. I can share our accreditation, BBB status, and customer references if you'd like. Our track record is one of transparent pricing and reliable delivery — I don't like to make investment performance claims since that's not really my lane, but I can stand behind our service record fully.",
+        quality:'great', complianceRisk:false,
+        reaction:"Transparent pricing and reliable delivery — that's honestly what matters most. I've been burned by hidden fees before.",
+        score:94, saleChance:82, salePotential:25000,
+        feedback:"Excellent distinction between business track record vs. investment performance. Built trust and credibility.", violation:false },
+      { text:"We've been in business since 2013, registered with all relevant industry bodies. Happy to share our credentials, references, and third-party reviews.",
+        quality:'good', complianceRisk:false,
+        reaction:"Longevity is a good sign. Who are your industry registrations with?",
+        score:80, saleChance:68, salePotential:18000,
+        feedback:"Solid answer. Offering credentials and reviews is strong credibility-building.", violation:false },
+      { text:"Our clients have seen great returns — gold is up significantly from where it was when we started!",
+        quality:'bad', complianceRisk:true,
+        reaction:"You're attributing market price movements to your track record?",
+        score:10, saleChance:8, salePotential:0,
+        feedback:"Conflating market price appreciation with business track record is misleading — and citing returns violates performance disclosure rules.", violation:true, violationNote:"Investment return attribution without required disclosures." },
+      { text:"We've been around for several years with a good reputation.",
+        quality:'mediocre', complianceRisk:false,
+        reaction:"Can you be more specific?",
+        score:45, saleChance:48, salePotential:8000,
+        feedback:"Too vague for a buyer who's warm and asking specific qualifying questions.", violation:false },
+    ]
+  },
+
+  {
+    type:'interested', callerName:'Tom, 55', avatar:'😊', bgColor:'#EEF5FF',
+    intro:"Tom speaking. Actually, perfect timing — my buddy was just talking about gold.",
+    objection:"My friend said he made great money on gold. What kind of returns should I expect?",
+    complianceTip:"You CANNOT promise or project returns. Acknowledge his friend's experience may reflect market conditions, not guaranteed outcomes, and redirect to their own research and advisor.",
+    options:[
+      { text:"I'm glad to hear your friend had a positive experience! But I do want to be upfront with you — I can't project returns or tell you what to expect. Precious metals prices fluctuate with the market just like anything else, and what happened for your friend reflects the specific time he bought and sold. What I can do is be transparent about our pricing and give you accurate information about the product itself.",
+        quality:'great', complianceRisk:false,
+        reaction:"I appreciate the honesty. My friend did buy at a specific time — that context matters.",
+        score:95, saleChance:75, salePotential:20000,
+        feedback:"Masterclass in handling a return expectation question without violating compliance.", violation:false },
+      { text:"Your friend's experience is real — but I can't predict what the market will do. Prices go up and they can go down. That context is important going in.",
+        quality:'good', complianceRisk:false,
+        reaction:"Fair point. So it's not a sure thing.",
+        score:82, saleChance:62, salePotential:14000,
+        feedback:"Good acknowledgment of downside risk — important for managing expectations legally and ethically.", violation:false },
+      { text:"Gold has been one of the best performing assets this decade! Returns of 10-15% per year are very achievable.",
+        quality:'bad', complianceRisk:true,
+        reaction:"Wait — are you licensed to make that projection?",
+        score:5, saleChance:3, salePotential:0,
+        feedback:"Projecting specific percentage returns is a serious securities violation without proper licensing and disclosures.", violation:true, violationNote:"Projected return claim — requires investment advisor licensing and full disclosures." },
+      { text:"Gold has historically been a solid performer. I'd expect positive movement over time.",
+        quality:'mediocre', complianceRisk:true,
+        reaction:"That sounds like a soft promise...",
+        score:25, saleChance:18, salePotential:3000,
+        feedback:"'I'd expect positive movement' is dangerously close to projecting returns — avoid any future performance language.", violation:true, violationNote:"Implying expected positive returns — return projection without disclaimers." },
+    ]
+  },
+
+  {
+    type:'interested', callerName:'Cynthia, 46', avatar:'😊', bgColor:'#FFF0FF',
+    intro:"Cynthia here. Funny — I was thinking about gold this morning!",
+    objection:"I want to buy gold for my kids' inheritance. How do I set that up properly?",
+    complianceTip:"Estate planning is for attorneys. Explain how physical metals transfer as property but direct her to an estate attorney for structuring.",
+    options:[
+      { text:"What a thoughtful plan! The purchase itself is simple — you own the physical metals, they're your property. For how to structure it for inheritance — wills, trusts, beneficiary arrangements — that's really something to set up with your estate attorney. Physical assets like gold fold into an estate the same way jewelry or property does, but the specifics should come from a licensed attorney. What I can help with is the buying and storage side.",
+        quality:'great', complianceRisk:false,
+        reaction:"That makes complete sense. My attorney handles my estate anyway — I'll loop her in.",
+        score:93, saleChance:80, salePotential:28000,
+        feedback:"Perfect split — you handled your lane (purchase/storage) and sent the legal part to the right person.", violation:false },
+      { text:"Physical gold is personal property — it passes through an estate like any other tangible asset. I'd recommend talking to an estate attorney about how to title it or include it in a trust.",
+        quality:'good', complianceRisk:false,
+        reaction:"Title it or put it in a trust — I hadn't thought about that. Good point.",
+        score:80, saleChance:68, salePotential:20000,
+        feedback:"Good practical context with appropriate referral.", violation:false },
+      { text:"Easy — we can set up a joint account with your kids as beneficiaries! No probate needed!",
+        quality:'bad', complianceRisk:true,
+        reaction:"You can set up legal beneficiary arrangements?",
+        score:8, saleChance:5, salePotential:0,
+        feedback:"You cannot set up beneficiary arrangements or make probate promises — this is legal advice you're not licensed to give.", violation:true, violationNote:"Legal advice on estate/beneficiary structures — outside scope, requires attorney." },
+      { text:"We can help you with the purchase — the legal side of inheritance is best discussed with a lawyer.",
+        quality:'mediocre', complianceRisk:false,
+        reaction:"Yes, I figured as much. But tell me more about what you'd actually sell me.",
+        score:55, saleChance:58, salePotential:12000,
+        feedback:"Correct redirection but felt dismissive — she's a warm lead wanting to buy, stay engaged!", violation:false },
+    ]
+  },
+
+  {
+    type:'interested', callerName:'Gary, 53', avatar:'😊', bgColor:'#F0FFEE',
+    intro:"Gary here. I've been watching gold prices go up — good time to buy?",
+    objection:"Is now a good time to get in? Prices seem high.",
+    complianceTip:"You cannot advise on market timing. Acknowledge the price observation, explain you can't give market timing advice, and pivot to long-term holding rationale without making predictions.",
+    options:[
+      { text:"Honestly, I can't tell you whether now is the right time — I'm not a financial advisor and I genuinely don't know where prices go from here. What I can say is that most people who buy physical metals think of it as a long-term hold, not a trade. If you're worried about timing, it might be worth talking to your financial advisor about that. What I can help with is making sure the purchase itself is clean, fairly priced, and secure whenever you decide.",
+        quality:'great', complianceRisk:false,
+        reaction:"I respect that. You could have just told me it's always a good time. That's what they usually say.",
+        score:96, saleChance:72, salePotential:22000,
+        feedback:"Exceptional integrity — admitting you can't predict timing while staying focused on value builds enormous trust.", violation:false },
+      { text:"Market timing is really outside what I can advise on — that's more of a question for your financial advisor. What I can speak to is the product side whenever you're ready.",
+        quality:'good', complianceRisk:false,
+        reaction:"Fair enough. Let's talk product then.",
+        score:80, saleChance:65, salePotential:16000,
+        feedback:"Clean and compliant. Pivoted effectively to what you can help with.", violation:false },
+      { text:"Prices have pulled back a bit this week — it's actually a great entry point right now!",
+        quality:'bad', complianceRisk:true,
+        reaction:"So you're recommending I buy now based on price movement?",
+        score:12, saleChance:15, salePotential:0,
+        feedback:"Timing recommendations and 'entry point' language are investment advice — outside your scope and a compliance violation.", violation:true, violationNote:"Market timing recommendation — investment advice requiring financial advisor licensing." },
+      { text:"Gold tends to hold value over time — a lot of our clients buy regardless of where prices are.",
+        quality:'mediocre', complianceRisk:false,
+        reaction:"That's a bit of a non-answer to my actual question.",
+        score:42, saleChance:38, salePotential:6000,
+        feedback:"Redirected without really engaging. He asked a specific question that deserved more substance.", violation:false },
+    ]
+  },
+];
+
+// ─── BAD CALL EVENTS ──────────────────────────────────────────
+const BAD_CALLS = [
+  { emoji:'📵', title:'HUNG UP!', msg:'They heard your intro and... click. Dial tone.', color:'#FF6B35' },
+  { emoji:'😡', title:'RAGE QUIT!', msg:'"STOP CALLING ME!" *slam*. That\'s gonna sting.', color:'#FF3B30' },
+  { emoji:'🤪', title:'WRONG NUMBER!', msg:'"Domino\'s Pizza?" You dialed a pizza place by accident.', color:'#FF9500' },
+  { emoji:'📬', title:'VOICEMAIL!', msg:'"Hi you\'ve reached... please leave a message..." Beep.', color:'#8E8E93' },
+  { emoji:'😴', title:'NO ANSWER!', msg:'Ring ring ring ring... nothing. Story of your life.', color:'#636366' },
+  { emoji:'🤖', title:'ROBOCALL DETECTED!', msg:'They have a robocall blocker. Your call was flagged and dropped.', color:'#5856D6' },
+  { emoji:'👶', title:'WRONG PERSON!', msg:'"Hello?" ...It\'s a toddler. Just a toddler.', color:'#FF9500' },
+  { emoji:'🌊', title:'STATIC NOISE!', msg:'The call connected but there\'s nothing but static. Technical difficulties.', color:'#636366' },
+];
+
+// ═══════════════════════════════════════════════════════════════
+// GAME STATE
+// ═══════════════════════════════════════════════════════════════
+let state = {
+  cash: 2000,
+  totalEarned: 0,
+  callCount: 0,
+  salesCount: 0,
+  violationCount: 0,
+  upgrades: { filter:0, hint:0, volume:0, script:0, closer:0 },
+  metals: { gold: 1950, silver: 24.5, platinum: 980, palladium: 1050 },
+  prevMetals: { gold: 1950, silver: 24.5, platinum: 980, palladium: 1050 },
+  inventory: { gold:0, silver:0, platinum:0, palladium:0 },
+  callLog: [],
+  currentCall: null,
+  currentOptions: null,
+  gamePhase: 'idle', // idle | ringing | calling | result
+  pendingSaleResult: null,
+  usedCallIndices: [],
+};
+
+// ═══════════════════════════════════════════════════════════════
+// GAME FUNCTIONS
+// ═══════════════════════════════════════════════════════════════
+
+function startGame() {
+  document.getElementById('intro-screen').style.display = 'none';
+  document.getElementById('game-screen').style.display = 'block';
+  renderMarket();
+  renderUpgrades();
+  updateTicker();
+  updateStats();
+}
+
+function fmt(n) {
+  return '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function showTab(tab) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  event.target.classList.add('active');
+}
+
+function updateStats() {
+  document.getElementById('cash-display').textContent = fmt(state.cash);
+  document.getElementById('calls-display').textContent = state.callCount;
+  document.getElementById('sales-display').textContent = state.salesCount;
+  document.getElementById('violations-display').textContent = state.violationCount;
+  document.getElementById('total-earned-display').textContent = fmt(state.totalEarned);
+
+  // Portfolio value
+  let pv = 0;
+  Object.keys(state.inventory).forEach(m => {
+    pv += state.inventory[m] * state.metals[m];
+  });
+  document.getElementById('portfolio-display').textContent = fmt(pv);
+
+  const badRate = Math.max(5, 35 - state.upgrades.filter * 20);
+  document.getElementById('bad-rate-display').textContent = badRate + '%';
+}
+
+function updateTicker() {
+  const m = state.metals;
+  const p = state.prevMetals;
+  const items = Object.entries(m).map(([metal, price]) => {
+    const prev = p[metal] || price;
+    const diff = price - prev;
+    const pct = ((diff / prev) * 100).toFixed(2);
+    const arrow = diff >= 0 ? '▲' : '▼';
+    const color = diff >= 0 ? '#00FF00' : '#FF4444';
+    return `<span>${metal.toUpperCase()}: ${fmt(price)} <span style="color:${color}">${arrow}${Math.abs(pct)}%</span></span>`;
+  }).join('  &nbsp;&nbsp;&bull;&nbsp;&nbsp;  ');
+  document.getElementById('ticker-inner').innerHTML = items + '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' + items;
+}
+
+function fluctuate() {
+  state.prevMetals = { ...state.metals };
+  const vol = { gold: 0.025, silver: 0.10, platinum: 0.045, palladium: 0.055 };
+  Object.keys(state.metals).forEach(m => {
+    const v = vol[m];
+    state.metals[m] = parseFloat((state.metals[m] * (1 + (Math.random() - 0.5) * 2 * v)).toFixed(2));
+    if (state.metals[m] < 5) state.metals[m] = 5;
+  });
+  updateTicker();
+  renderMarket();
+}
+
+// ── DIAL ──────────────────────────────────────────────────────
+async function dialNumber() {
+  if (state.gamePhase !== 'idle') return;
+  state.gamePhase = 'ringing';
+
+  document.getElementById('call-btn').disabled = true;
+  fluctuate();
+
+  // Animate phone number
+  const phoneEl = document.getElementById('phone-number');
+  const statusEl = document.getElementById('phone-status');
+  statusEl.style.color = '#FFAA00';
+  statusEl.textContent = '📡 Connecting...';
+
+  const digits = Array.from({length:10}, () => Math.floor(Math.random()*9)+1);
+  const formatted = `${digits[0]}${digits[1]}${digits[2]}-${digits[3]}${digits[4]}${digits[5]}-${digits[6]}${digits[7]}${digits[8]}${digits[9]}`;
+
+  phoneEl.style.color = '#FFAA00';
+  phoneEl.style.textShadow = '0 0 20px #FFAA00';
+
+  for (let i = 0; i <= formatted.length; i++) {
+    await sleep(55);
+    phoneEl.textContent = formatted.slice(0, i) + '█'.repeat(Math.max(0, formatted.length - i)).slice(0,1);
+  }
+  phoneEl.textContent = formatted;
+
+  await sleep(300);
+  statusEl.textContent = '🔔 Ringing...';
+  statusEl.style.color = '#00FF00';
+  phoneEl.style.color = '#00FF00';
+  phoneEl.style.textShadow = '0 0 20px #00FF00';
+
+  await sleep(1200);
+
+  // Check for bad call
+  const badRate = Math.max(0.05, 0.35 - state.upgrades.filter * 0.07);
+  if (Math.random() < badRate) {
+    doBadCall();
+    return;
+  }
+
+  // Pick a call from the tree
+  doGoodCall();
+}
+
+function doBadCall() {
+  const bad = BAD_CALLS[Math.floor(Math.random() * BAD_CALLS.length)];
+  state.callCount++;
+  state.gamePhase = 'idle';
+
+  document.getElementById('phone-status').textContent = bad.title;
+  document.getElementById('phone-status').style.color = '#FF3B30';
+
+  const badScreen = document.getElementById('bad-call-screen');
+  document.getElementById('dial-area').style.display = 'none';
+  document.getElementById('caller-area').style.display = 'none';
+
+  document.getElementById('bad-call-emoji').textContent = bad.emoji;
+  document.getElementById('bad-call-msg').textContent = bad.msg;
+  badScreen.style.display = 'block';
+
+  // Log it
+  addLog({ type:'badcall', callNum: state.callCount, label: bad.title, earned: 0 });
+  updateStats();
+}
+
+function doGoodCall() {
+  // Pick unused call
+  let available = CALL_TREES.map((_,i) => i).filter(i => !state.usedCallIndices.includes(i));
+  if (available.length === 0) {
+    state.usedCallIndices = [];
+    available = CALL_TREES.map((_,i) => i);
+  }
+  const idx = available[Math.floor(Math.random() * available.length)];
+  state.usedCallIndices.push(idx);
+  state.currentCall = CALL_TREES[idx];
+
+  document.getElementById('phone-status').textContent = '✅ Connected!';
+  document.getElementById('phone-status').style.color = '#00FF00';
+
+  // Show caller
+  const call = state.currentCall;
+  document.getElementById('bad-call-screen').style.display = 'none';
+  document.getElementById('dial-area').style.display = 'none';
+  document.getElementById('caller-area').style.display = 'block';
+
+  document.getElementById('caller-avatar').textContent = call.avatar;
+  document.getElementById('caller-avatar').style.background = call.bgColor;
+  document.getElementById('caller-name-tag').textContent = call.callerName + ' • ' + call.type.charAt(0).toUpperCase() + call.type.slice(1);
+  document.getElementById('caller-speech').textContent = call.intro;
+
+  // Show compliance tip if upgraded
+  const tipBox = document.getElementById('compliance-tip-box');
+  if (state.upgrades.script >= 1) {
+    tipBox.style.display = 'block';
+    document.getElementById('compliance-tip-text').textContent = call.complianceTip;
+  } else {
+    tipBox.style.display = 'none';
+  }
+
+  // Slight delay then show objection + options
+  setTimeout(() => {
+    document.getElementById('caller-speech').textContent = call.objection;
+    document.getElementById('options-area').style.display = 'block';
+    document.getElementById('result-popup').style.display = 'none';
+    renderOptions(call);
+    state.gamePhase = 'calling';
+    state.callCount++;
+  }, 1800);
+}
+
+function renderOptions(call) {
+  const opts = call.options;
+  const container = document.getElementById('options-container');
+  container.innerHTML = '';
+  const letters = ['A', 'B', 'C', 'D'];
+
+  // Shuffle options
+  const shuffled = [...opts].sort(() => Math.random() - 0.5);
+  state.currentOptions = shuffled;
+
+  shuffled.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    if (state.upgrades.hint >= 1 && opt.complianceRisk) {
+      btn.classList.add('bad-hint');
+    }
+    btn.innerHTML = `
+      <span class="opt-letter">${letters[i]}</span>
+      <span>${opt.text}</span>
+      ${state.upgrades.hint >= 1 && opt.complianceRisk ? '<span class="compliance-badge">⚠ RISKY</span>' : ''}
+    `;
+    btn.onclick = () => selectOption(opt, i);
+    container.appendChild(btn);
+  });
+}
+
+function selectOption(opt, selectedIdx) {
+  if (state.gamePhase !== 'calling') return;
+  state.gamePhase = 'result';
+
+  // Disable all buttons and highlight
+  const btns = document.querySelectorAll('.option-btn');
+  btns.forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === selectedIdx) {
+      if (opt.quality === 'great' || opt.quality === 'good') btn.classList.add('selected-good');
+      else if (opt.quality === 'bad') btn.classList.add('selected-bad');
+      else btn.classList.add('selected-ok');
+    } else {
+      btn.classList.add('dimmed');
+    }
+  });
+
+  // Show reaction
+  document.getElementById('caller-speech').textContent = opt.reaction;
+
+  // Calculate sale
+  const volumeMult = 1 + state.upgrades.volume * 0.25;
+  const closerBonus = 1 + state.upgrades.closer * 0.15;
+  let earned = 0;
+
+  if (!opt.violation && opt.saleChance > 0) {
+    const roll = Math.random() * 100;
+    const threshold = opt.saleChance * closerBonus;
+    if (roll < threshold) {
+      earned = Math.round(opt.salePotential * volumeMult * (opt.score / 100));
+    }
+  }
+
+  if (opt.violation) state.violationCount++;
+  if (earned > 0) state.salesCount++;
+
+  state.cash += earned;
+  state.totalEarned += earned;
+
+  // Stars
+  const stars = opt.score >= 85 ? '⭐⭐⭐' : opt.score >= 60 ? '⭐⭐' : '⭐';
+
+  // Show result popup
+  const popup = document.getElementById('result-popup');
+  const header = document.getElementById('result-header');
+  const feedback = document.getElementById('result-feedback');
+  const reaction = document.getElementById('result-reaction');
+  const saleDiv = document.getElementById('result-sale');
+  const scoreDiv = document.getElementById('result-score-area');
+
+  if (opt.violation) {
+    header.className = 'result-header bad';
+    header.textContent = '⚠️ COMPLIANCE VIOLATION!';
+  } else if (earned > 0) {
+    header.className = 'result-header good';
+    header.textContent = '💰 SALE CLOSED!';
+  } else if (opt.quality === 'great') {
+    header.className = 'result-header good';
+    header.textContent = '✅ GREAT ANSWER!';
+  } else if (opt.quality === 'bad') {
+    header.className = 'result-header bad';
+    header.textContent = '❌ POOR ANSWER!';
+  } else {
+    header.className = 'result-header ok';
+    header.textContent = '🤷 DECENT ANSWER';
+  }
+
+  feedback.textContent = opt.feedback;
+  if (opt.violation && opt.violationNote) {
+    feedback.textContent += ' [VIOLATION: ' + opt.violationNote + ']';
+    feedback.style.borderLeft = '4px solid var(--red)';
+  } else {
+    feedback.style.borderLeft = '';
+  }
+
+  if (earned > 0) {
+    saleDiv.innerHTML = `<div class="sale-amount">+${fmt(earned)}</div>`;
+    spawnCoins();
+  } else if (opt.saleChance === 0) {
+    saleDiv.innerHTML = `<div style="font-family:'Fredoka One',cursive;color:#999;">No sale possible on this call.</div>`;
+  } else {
+    saleDiv.innerHTML = `<div style="font-family:'Fredoka One',cursive;color:var(--red);">No sale this time.</div>`;
+  }
+
+  scoreDiv.innerHTML = `<div class="stars">${stars}</div><div style="font-size:0.8rem;font-weight:700;color:#777;">Score: ${opt.score}/100</div>`;
+
+  popup.style.display = 'block';
+
+  // Log
+  addLog({ type: earned > 0 ? 'win' : (opt.violation ? 'violation' : 'loss'), callNum: state.callCount, label: state.currentCall.callerName, objection: state.currentCall.objection.slice(0,60)+'...', earned, violation: opt.violation });
+
+  updateStats();
+}
+
+function nextCall() {
+  // Reset from bad call
+  document.getElementById('bad-call-screen').style.display = 'none';
+  document.getElementById('dial-area').style.display = 'block';
+  document.getElementById('call-btn').disabled = false;
+  document.getElementById('phone-number').textContent = '___-___-____';
+  document.getElementById('phone-status').textContent = 'Ready to dial!';
+  document.getElementById('phone-status').style.color = '#888';
+  document.getElementById('phone-number').style.color = '#00FF00';
+  document.getElementById('phone-number').style.textShadow = '0 0 20px #00FF00, 0 0 40px #00AA00';
+  state.gamePhase = 'idle';
+  updateStats();
+}
+
+function nextCallOrContinue() {
+  document.getElementById('caller-area').style.display = 'none';
+  document.getElementById('options-area').style.display = 'none';
+  document.getElementById('result-popup').style.display = 'none';
+  document.getElementById('bad-call-screen').style.display = 'none';
+  document.getElementById('dial-area').style.display = 'block';
+  document.getElementById('call-btn').disabled = false;
+  document.getElementById('phone-number').textContent = '___-___-____';
+  document.getElementById('phone-status').textContent = 'Ready to dial!';
+  document.getElementById('phone-status').style.color = '#888';
+  document.getElementById('phone-number').style.color = '#00FF00';
+  document.getElementById('phone-number').style.textShadow = '0 0 20px #00FF00, 0 0 40px #00AA00';
+  state.gamePhase = 'idle';
+  updateStats();
+}
+
+// ── MARKET ────────────────────────────────────────────────────
+const METAL_ICONS = { gold:'🥇', silver:'🥈', platinum:'⬜', palladium:'🔷' };
+const METAL_COLORS = { gold:'#FFD700', silver:'#C0C0C0', platinum:'#E5E4E2', palladium:'#BDB9B0' };
+
+function renderMarket() {
+  const container = document.getElementById('metals-market');
+  container.innerHTML = '';
+  Object.keys(state.metals).forEach(metal => {
+    const price = state.metals[metal];
+    const prev = state.prevMetals[metal] || price;
+    const diff = price - prev;
+    const pct = ((diff / prev) * 100).toFixed(2);
+    const owned = state.inventory[metal] || 0;
+
+    container.innerHTML += `
+      <div class="metal-card">
+        <div class="metal-name">
+          <span>${METAL_ICONS[metal]}</span>
+          <span>${metal.toUpperCase()}</span>
+          <span class="price-change ${diff >= 0 ? 'up' : 'down'}">${diff >= 0 ? '▲' : '▼'} ${Math.abs(pct)}%</span>
+        </div>
+        <div class="metal-price">${fmt(price)}<span style="font-size:0.75rem;color:#999;font-family:'Nunito',sans-serif;font-weight:600;">/oz</span></div>
+        <div class="metal-owned">Owned: ${owned} oz (Value: ${fmt(owned * price)})</div>
+        <div class="buy-sell-row">
+          <span style="font-size:0.8rem;font-weight:800;">Qty:</span>
+          <input type="number" min="1" value="1" id="qty-${metal}" class="qty-input">
+          <button class="buy-btn" onclick="buyMetal('${metal}')">BUY</button>
+          <button class="sell-btn" onclick="sellMetal('${metal}')" ${owned === 0 ? 'disabled' : ''}>SELL</button>
+        </div>
+      </div>
+    `;
+  });
+}
+
+function buyMetal(metal) {
+  const qty = parseInt(document.getElementById('qty-' + metal).value) || 1;
+  const cost = state.metals[metal] * qty;
+  if (state.cash < cost) {
+    shakeElement('tab-market');
+    return;
+  }
+  state.cash -= cost;
+  state.inventory[metal] = (state.inventory[metal] || 0) + qty;
+  updateStats();
+  renderMarket();
+}
+
+function sellMetal(metal) {
+  const qty = parseInt(document.getElementById('qty-' + metal).value) || 1;
+  if ((state.inventory[metal] || 0) < qty) return;
+  const revenue = state.metals[metal] * qty;
+  state.cash += revenue;
+  state.totalEarned += revenue;
+  state.inventory[metal] -= qty;
+  updateStats();
+  renderMarket();
+  if (revenue > 100) spawnCoins();
+}
+
+// ── UPGRADES ─────────────────────────────────────────────────
+function renderUpgrades() {
+  const container = document.getElementById('upgrades-container');
+  container.innerHTML = '';
+  UPGRADES_DEF.forEach(u => {
+    const level = state.upgrades[u.id] || 0;
+    const maxed = level >= u.maxLevel;
+    const canAfford = state.cash >= u.cost;
+    const dots = Array.from({length: u.maxLevel}, (_, i) =>
+      `<div class="lvl-dot ${i < level ? 'filled' : ''}"></div>`
+    ).join('');
+
+    container.innerHTML += `
+      <div class="upgrade-card">
+        <div class="upgrade-icon">${u.icon}</div>
+        <div class="upgrade-info">
+          <div class="upgrade-name">${u.name} ${level > 0 ? `<span style="color:var(--gold-dark)">Lv.${level}</span>` : ''}</div>
+          <div class="upgrade-desc">${u.desc}</div>
+          ${level > 0 ? `<div class="upgrade-desc" style="color:var(--green);">${u.effect(level)}</div>` : ''}
+          <div class="upgrade-level-dots">${dots}</div>
+        </div>
+        <button class="upgrade-buy-btn ${maxed ? 'maxed' : ''}" onclick="buyUpgrade('${u.id}')" ${maxed || !canAfford ? 'disabled' : ''}>
+          ${maxed ? 'MAXED!' : fmt(u.cost)}
+        </button>
+      </div>
+    `;
+  });
+}
+
+function buyUpgrade(id) {
+  const u = UPGRADES_DEF.find(u => u.id === id);
+  if (!u) return;
+  const level = state.upgrades[id] || 0;
+  if (level >= u.maxLevel || state.cash < u.cost) return;
+  state.cash -= u.cost;
+  state.upgrades[id] = level + 1;
+  updateStats();
+  renderUpgrades();
+  updateStats();
+}
+
+// ── LOG ───────────────────────────────────────────────────────
+function addLog(entry) {
+  state.callLog.unshift(entry);
+  if (state.callLog.length > 20) state.callLog.pop();
+  renderLog();
+}
+
+function renderLog() {
+  const container = document.getElementById('call-log');
+  if (state.callLog.length === 0) {
+    container.innerHTML = '<div style="font-family:\'Fredoka One\',cursive;color:#999;text-align:center;padding:20px;">No calls yet!</div>';
+    return;
+  }
+  container.innerHTML = state.callLog.map(e => `
+    <div class="log-entry ${e.type}">
+      <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
+        <span>${e.type === 'win' ? '💰' : e.type === 'violation' ? '⚠️' : e.type === 'badcall' ? '📵' : '📞'} Call #${e.callNum}</span>
+        <span style="color:${e.earned > 0 ? 'var(--green)' : '#999'}">${e.earned > 0 ? '+' + fmt(e.earned) : e.type === 'badcall' ? e.label : 'no sale'}</span>
+      </div>
+      ${e.label && e.type !== 'badcall' ? `<div style="font-size:0.75rem;color:#666;">${e.label}</div>` : ''}
+      ${e.objection ? `<div style="font-size:0.72rem;color:#888;font-style:italic;">${e.objection}</div>` : ''}
+      ${e.violation ? `<div style="font-size:0.7rem;color:var(--red);">⚠ Compliance Violation</div>` : ''}
+    </div>
+  `).join('');
+}
+
+// ── UTILS ─────────────────────────────────────────────────────
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function spawnCoins() {
+  for (let i = 0; i < 6; i++) {
+    setTimeout(() => {
+      const coin = document.createElement('div');
+      coin.className = 'coin-pop';
+      coin.textContent = ['💰','🪙','⭐','✨'][Math.floor(Math.random()*4)];
+      coin.style.left = (30 + Math.random() * 60) + 'vw';
+      coin.style.top = (40 + Math.random() * 20) + 'vh';
+      document.body.appendChild(coin);
+      setTimeout(() => coin.remove(), 1200);
+    }, i * 100);
+  }
+}
+
+function shakeElement(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.style.animation = 'shake 0.4s ease';
+  setTimeout(() => el.style.animation = '', 500);
+}
+
+// Update upgrades tab whenever cash changes (to enable/disable buy buttons)
+const origUpdateStats = updateStats;
+
+</script>
+</body>
+</html>
